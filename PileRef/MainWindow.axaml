@@ -2,8 +2,49 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:model="clr-namespace:PileRef.Model"
+        xmlns:pileRef="clr-namespace:PileRef"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="PileRef.MainWindow"
         Title="PileRef">
-    Welcome to Avalonia!
+        <ItemsControl x:Name="v_PileView" Background="DimGray" Items="{Binding Pile.Notes}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsControl.ContextMenu>
+                        <ContextMenu>
+                                <MenuItem PointerPressed="CreateNewNote" Header="New Note"></MenuItem>
+                                <MenuItem PointerPressed="CreateNewDocument" Header="New Document"></MenuItem>
+                                <Separator></Separator>
+                                <MenuItem PointerPressed="CreateNewPile" Header="New Pile"></MenuItem>
+                                <MenuItem PointerPressed="OpenPile" Header="Open Pile..."></MenuItem>
+                                <MenuItem Header="Open Recent Pile" Items="{Binding RecentPiles}">
+                                        <MenuItem.ItemTemplate>
+                                                <DataTemplate DataType="x:String">
+                                                        <MenuItem Header="{Binding}"></MenuItem>
+                                                </DataTemplate>
+                                        </MenuItem.ItemTemplate>
+                                </MenuItem>
+                        </ContextMenu>
+                </ItemsControl.ContextMenu>
+                
+                <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                                <Canvas></Canvas>
+                        </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                
+                <ItemsControl.Styles>
+                        <Style Selector="ItemsControl > ContentPresenter">
+                                <Setter Property="Canvas.Top" Value="{Binding Path=YPosition}" />
+                                <Setter Property="Canvas.Left" Value="{Binding Path=XPosition}" />
+                        </Style>
+                </ItemsControl.Styles>
+                
+                <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="model:Note">
+                                <pileRef:NoteView 
+                                        Width="{Binding $parent.DataContext.Width}" 
+                                        Height="{Binding $parent.DataContext.Height}">
+                                </pileRef:NoteView>
+                        </DataTemplate>
+                </ItemsControl.ItemTemplate>
+        </ItemsControl>
 </Window>
