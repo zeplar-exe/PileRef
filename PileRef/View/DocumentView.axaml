@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:model="clr-namespace:PileRef.Model"
+             xmlns:pileRef="clr-namespace:PileRef"
+             xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
+             x:Class="PileRef.DocumentView">
+    <StackPanel Orientation="Vertical">
+        <TextBox x:Name="v_Title" IsReadOnly="{Binding !ViewModel.EditingTitle}" 
+                 HorizontalAlignment="Stretch" TextAlignment="Center" 
+                 Text="{Binding Document.Title}"></TextBox>
+        <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <ContentControl Content="{Binding Document}">
+                <ContentControl.ContentTemplate>
+                    <pileRef:PileObjectTemplateSelector>
+                        <DataTemplate x:Key="{x:Type model:MarkdownDocument}" DataType="model:MarkdownDocument">
+                            <mdxaml:MarkdownScrollViewer Markdown="{Binding Content}"/>
+                        </DataTemplate>
+                        <DataTemplate x:Key="{x:Type model:PlainTextDocument}" DataType="model:PlainTextDocument">
+                            <SelectableTextBlock Text="{Binding Content}"
+                                                 TextWrapping="Wrap"/>
+                        </DataTemplate>
+                    </pileRef:PileObjectTemplateSelector>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+        </ScrollViewer>
+    </StackPanel>
+</UserControl>

@@ -2,11 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="PileRef.NoteView">
     <StackPanel Orientation="Vertical">
-        <TextBox HorizontalAlignment="Stretch" TextAlignment="Center" Text="{Binding Note.Title}"></TextBox>
+        <TextBox x:Name="v_Title" IsReadOnly="{Binding NotEditingTitle}"
+                 HorizontalAlignment="Stretch" TextAlignment="Center" 
+                 Text="{Binding Note.Title}"></TextBox>
         <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <TextBox
-                BorderThickness="0"
-                AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding Note.Text}"></TextBox>
+            <TextBox x:Name="v_Content" IsReadOnly="{Binding NotEditingContent}"
+                     BorderThickness="0"
+                     AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding Note.Text}"></TextBox>
         </ScrollViewer>
     </StackPanel>
 </UserControl>

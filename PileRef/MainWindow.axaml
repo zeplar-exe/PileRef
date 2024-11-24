@@ -7,15 +7,18 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="PileRef.MainWindow"
         Title="PileRef">
-        <ItemsControl x:Name="v_PileView" Background="DimGray" Items="{Binding Pile.Notes}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <ItemsControl x:Name="v_PileView" 
+                      Background="DimGray" ItemsSource="{Binding Pile.AllObjects}" 
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <ItemsControl.ContextMenu>
                         <ContextMenu>
-                                <MenuItem PointerPressed="CreateNewNote" Header="New Note"></MenuItem>
-                                <MenuItem PointerPressed="CreateNewDocument" Header="New Document"></MenuItem>
+                                <MenuItem PointerReleased="CreateNewNote" Header="New Note"></MenuItem>
+                                <MenuItem PointerReleased="OpenDocument" Header="Open Document"></MenuItem>
                                 <Separator></Separator>
-                                <MenuItem PointerPressed="CreateNewPile" Header="New Pile"></MenuItem>
-                                <MenuItem PointerPressed="OpenPile" Header="Open Pile..."></MenuItem>
-                                <MenuItem Header="Open Recent Pile" Items="{Binding RecentPiles}">
+                                <MenuItem PointerReleased="CreateNewPile" Header="New Pile"></MenuItem>
+                                <MenuItem PointerReleased="SavePile" Header="Save Pile"></MenuItem>
+                                <MenuItem PointerReleased="OpenPile" Header="Open Pile..."></MenuItem>
+                                <MenuItem Header="Open Recent Pile" ItemsSource="{Binding RecentPiles}">
                                         <MenuItem.ItemTemplate>
                                                 <DataTemplate DataType="x:String">
                                                         <MenuItem Header="{Binding}"></MenuItem>
@@ -39,12 +42,21 @@
                 </ItemsControl.Styles>
                 
                 <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="model:Note">
-                                <pileRef:NoteView 
-                                        Width="{Binding $parent.DataContext.Width}" 
-                                        Height="{Binding $parent.DataContext.Height}">
-                                </pileRef:NoteView>
-                        </DataTemplate>
+                        <pileRef:PileObjectTemplateSelector>
+                                <DataTemplate x:Key="{x:Type model:Note}" DataType="model:Note">
+                                        <pileRef:NoteView 
+                                                Width="{Binding $parent.DataContext.Width}" 
+                                                Height="{Binding $parent.DataContext.Height}">
+                                        </pileRef:NoteView>
+                                </DataTemplate>
+                                <DataTemplate x:Key="{x:Type model:IDocument}" DataType="model:IDocument">
+                                        <pileRef:DocumentView 
+                                                Document="{Binding $parent.DataContext}"
+                                                Width="{Binding $parent.DataContext.Width}" 
+                                                Height="{Binding $parent.DataContext.Height}">
+                                        </pileRef:DocumentView>
+                                </DataTemplate>
+                        </pileRef:PileObjectTemplateSelector>
                 </ItemsControl.ItemTemplate>
         </ItemsControl>
 </Window>

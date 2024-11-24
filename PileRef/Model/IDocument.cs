@@ -1,12 +1,10 @@
-﻿using Avalonia;
+﻿using System.Text;
+using Avalonia;
 
 namespace PileRef.Model;
 
-public interface IDocument
+public interface IDocument : IPileObject
 {
     public string Title { get; set; }
-    public double XPosition { get; set; }
-    public double YPosition { get; set; }
-    public double Width { get; set; }
-    public double Height { get; set; }
+    public string FilePath { get; set; }
 }

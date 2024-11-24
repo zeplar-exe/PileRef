@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:model="clr-namespace:PileRef.Model"
+             xmlns:text="clr-namespace:System.Text;assembly=System.Runtime"
+             x:Class="PileRef.OpenDocumentView"
+             Title="Open Document">
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <TextBox Text="{Binding FilePath, Mode=TwoWay}"></TextBox>
+            <Button Click="OpenFile">O</Button>
+        </StackPanel>
+        <Separator></Separator>
+        
+        <ScrollViewer>
+            <ListBox ItemsSource="{Binding DocumentTypes}"
+                     SelectionMode="AlwaysSelected" SelectedItem="{Binding DocumentType}" 
+                     SelectionChanged="DocumentTypeSelected">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="model:DocumentType">
+                        <StackPanel>
+                            <Image></Image>
+                            <TextBlock Text="{Binding Name}"></TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </ScrollViewer>
+        <Separator></Separator>
+        
+        <StackPanel Orientation="Horizontal">
+            <Label>Title</Label>
+            <TextBox Watermark="..." Text="{Binding Title, Mode=TwoWay}"></TextBox>
+        </StackPanel>
+        <Label IsVisible="{Binding TitleEmpty}">Document title will default to "Untitled Document".</Label>
+        
+        <StackPanel IsVisible="{Binding DocumentType.IsTextEncodable}">
+            <Label>Encoding</Label>
+            <ComboBox SelectedIndex="0" ItemsSource="{Binding Encodings}" SelectionChanged="EncodingSelected">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="text:EncodingInfo">
+                        <ComboBoxItem>
+                            <Label Content="{Binding DisplayName}"></Label>
+                        </ComboBoxItem>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+        <Separator></Separator>
+        
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+            <Button Click="SelectDocument" IsEnabled="{Binding FormCompleted}">Open</Button>
+            <Button Click="CancelSelect">Cancel</Button>    
+        </StackPanel>
+    </StackPanel>
+</Window>
