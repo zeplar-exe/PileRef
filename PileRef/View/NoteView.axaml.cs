@@ -31,23 +31,22 @@ namespace PileRef
         
         private void PressedTitleEdit(object? sender, PointerPressedEventArgs e)
         {
-            ViewModel.NotEditingTitle = e.ClickCount < 2;
-            Console.WriteLine(e.ClickCount);
+            ViewModel.EditingTitle = ViewModel.EditingTitle || e.ClickCount >= 2;
         }
 
         private void TitleEditLostFocus(object? sender, RoutedEventArgs e)
         {
-            ViewModel.NotEditingTitle = true;
+            ViewModel.EditingTitle = false;
         }
         
         private void PressedContentEdit(object? sender, PointerPressedEventArgs e)
         {
-            ViewModel.NotEditingContent = e.ClickCount < 2;
+            ViewModel.EditingContent = ViewModel.EditingContent || e.ClickCount >= 2;
         }
 
         private void ContentEditLostFocus(object? sender, RoutedEventArgs e)
         {
-            ViewModel.NotEditingContent = true;
+            ViewModel.EditingContent = false;
         }
     }
 }

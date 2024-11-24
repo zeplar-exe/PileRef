@@ -4,24 +4,22 @@
              xmlns:pileRef="clr-namespace:PileRef"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
              x:Class="PileRef.DocumentView">
-    <StackPanel Orientation="Vertical">
-        <TextBox x:Name="v_Title" IsReadOnly="{Binding !ViewModel.EditingTitle}" 
-                 HorizontalAlignment="Stretch" TextAlignment="Center" 
-                 Text="{Binding Document.Title}"></TextBox>
-        <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <ContentControl Content="{Binding Document}">
-                <ContentControl.ContentTemplate>
-                    <pileRef:PileObjectTemplateSelector>
-                        <DataTemplate x:Key="{x:Type model:MarkdownDocument}" DataType="model:MarkdownDocument">
-                            <mdxaml:MarkdownScrollViewer Markdown="{Binding Content}"/>
-                        </DataTemplate>
-                        <DataTemplate x:Key="{x:Type model:PlainTextDocument}" DataType="model:PlainTextDocument">
-                            <SelectableTextBlock Text="{Binding Content}"
-                                                 TextWrapping="Wrap"/>
-                        </DataTemplate>
-                    </pileRef:PileObjectTemplateSelector>
-                </ContentControl.ContentTemplate>
-            </ContentControl>
-        </ScrollViewer>
-    </StackPanel>
+    <Grid RowDefinitions="Auto, *">
+        <TextBox Grid.Row="0" x:Name="v_Title" IsReadOnly="{Binding !ViewModel.EditingTitle}" 
+                 TextAlignment="Center" Text="{Binding Document.Title}"></TextBox>
+        <ContentControl Grid.Row="1" Content="{Binding Document}" Background="Tan">
+            <ContentControl.ContentTemplate>
+                <pileRef:PileObjectTemplateSelector>
+                    <DataTemplate x:Key="{x:Type model:MarkdownDocument}" DataType="model:MarkdownDocument">
+                        <mdxaml:MarkdownScrollViewer Cursor="IBeam" SelectionEnabled="True"
+                                                     Markdown="{Binding Content}"/>
+                    </DataTemplate>
+                    <DataTemplate x:Key="{x:Type model:PlainTextDocument}" DataType="model:PlainTextDocument">
+                        <SelectableTextBlock Text="{Binding Content}"
+                                             TextWrapping="Wrap"/>
+                    </DataTemplate>
+                </pileRef:PileObjectTemplateSelector>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
+    </Grid>
 </UserControl>
