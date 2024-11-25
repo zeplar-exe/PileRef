@@ -15,7 +15,11 @@ namespace PileRef
     {
         public DocumentViewModel ViewModel { get; }
         
-        public IDocument? Document { get; set; }
+        public IDocument? Document
+        {
+            get => GetValue(DocumentProperty); 
+            set => SetValue(DocumentProperty, value); 
+        }
         
         public static readonly StyledProperty<IDocument?> DocumentProperty =
             AvaloniaProperty.Register<DocumentView, IDocument?>(nameof(Document), defaultValue: null);
@@ -29,6 +33,11 @@ namespace PileRef
             
             v_Title.AddHandler(PointerPressedEvent, PressedTitleEdit, RoutingStrategies.Tunnel);
             v_Title.AddHandler(LostFocusEvent, TitleEditLostFocus, RoutingStrategies.Tunnel);
+        }
+        
+        private void ControlPressed(object? sender, PointerPressedEventArgs e)
+        {
+            ViewModel.Selected = true;
         }
 
         private void PressedTitleEdit(object? sender, PointerPressedEventArgs e)

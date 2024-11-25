@@ -1,14 +1,20 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="PileRef.NoteView">
-    <Grid RowDefinitions="Auto, *">
-        <TextBox Grid.Row="0" x:Name="v_Title" IsReadOnly="{Binding !EditingTitle}"
+    <Grid RowDefinitions="Auto, *" PointerPressed="ControlPressed">
+        <TextBox Grid.Row="0" x:Name="v_Title" 
+                 IsReadOnly="{Binding !ViewModel.EditingTitle}"
+                 Focusable="{Binding ViewModel.EditingTitle}"
                  HorizontalAlignment="Stretch" TextAlignment="Center" 
-                 Text="{Binding Note.Title}"></TextBox>
+                 Text="{Binding Note.Title, Mode=TwoWay}"
+                 LostFocus="TitleEditLostFocus"></TextBox>
         <ContentControl Grid.Row="1">
-            <TextBox x:Name="v_Content" IsReadOnly="{Binding !EditingContent}"
-                     BorderThickness="0" MinHeight="{Binding Note.Height}"
-                     AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding Note.Text}"></TextBox>
+            <TextBox x:Name="v_Content" 
+                     IsReadOnly="{Binding !ViewModel.EditingContent}"
+                     Focusable="{Binding ViewModel.EditingContent}"
+                     BorderThickness="0" AcceptsReturn="True" TextWrapping="Wrap" 
+                     Text="{Binding Note.Text, Mode=TwoWay}"
+                     LostFocus="ContentEditLostFocus"></TextBox>
         </ContentControl>
     </Grid>
 </UserControl>

@@ -3,19 +3,22 @@
              xmlns:model="clr-namespace:PileRef.Model"
              xmlns:pileRef="clr-namespace:PileRef"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
-             x:Class="PileRef.DocumentView">
+             x:Class="PileRef.DocumentView"
+             PointerPressed="ControlPressed">
     <Grid RowDefinitions="Auto, *">
-        <TextBox Grid.Row="0" x:Name="v_Title" IsReadOnly="{Binding !ViewModel.EditingTitle}" 
-                 TextAlignment="Center" Text="{Binding Document.Title}"></TextBox>
+        <TextBox Grid.Row="0" x:Name="v_Title" 
+                 IsReadOnly="{Binding !ViewModel.EditingTitle}" 
+                 Focusable="{Binding ViewModel.EditingTitle}"
+                 TextAlignment="Center" Text="{Binding Document.Title, Mode=TwoWay}"></TextBox>
         <ContentControl Grid.Row="1" Content="{Binding Document}" Background="Tan">
             <ContentControl.ContentTemplate>
                 <pileRef:PileObjectTemplateSelector>
                     <DataTemplate x:Key="{x:Type model:MarkdownDocument}" DataType="model:MarkdownDocument">
                         <mdxaml:MarkdownScrollViewer Cursor="IBeam" SelectionEnabled="True"
-                                                     Markdown="{Binding Content}"/>
+                                                     Markdown="{Binding Content, Mode=TwoWay}"/>
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:PlainTextDocument}" DataType="model:PlainTextDocument">
-                        <SelectableTextBlock Text="{Binding Content}"
+                        <SelectableTextBlock Text="{Binding Content, Mode=TwoWay}"
                                              TextWrapping="Wrap"/>
                     </DataTemplate>
                 </pileRef:PileObjectTemplateSelector>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Avalonia;
 using Avalonia.Controls;
@@ -13,6 +14,10 @@ namespace PileRef
 {
     public partial class MainWindow : Window
     {
+        private List<IPileObject> SelectedObjects { get; } = [];
+        private bool IsMouseDown { get; set; }
+        private Point LastMousePosition { get; set; }
+        
         public MainWindowViewModel ViewModel { get; }
         
         public MainWindow()
@@ -21,6 +26,10 @@ namespace PileRef
             DataContext = ViewModel;
             
             InitializeComponent();
+            
+            this.AddHandler(PointerPressedEvent, OnMouseDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+            this.AddHandler(PointerMovedEvent, OnMouseMove, RoutingStrategies.Tunnel, handledEventsToo: true);
+            this.AddHandler(PointerReleasedEvent, OnMouseUp, RoutingStrategies.Tunnel, handledEventsToo: true);
         }
 
         private void CreateNewNote(object? sender, PointerReleasedEventArgs e)
@@ -118,6 +127,74 @@ namespace PileRef
 
             ViewModel.PileFilePath = path;
             ViewModel.ChangesMade = false;
+        }
+
+        private void OnNoteSelected(object? sender, RoutedEventArgs e)
+        {
+            if (sender is not NoteView view)
+                return;
+
+            var args = (NoteSelectedEventArgs)e;
+            var pointerArgs = args.PointerPressedArgs;
+
+            if (SelectedObjects.Contains(view.Note))
+            {
+                if (pointerArgs.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                {
+                    SelectedObjects.Remove(view.Note);
+                }
+                else
+                {
+                    SelectedObjects.Clear();
+                    SelectedObjects.Add(view.Note);
+                }
+            }
+            else
+            {
+                if (pointerArgs.KeyModifiers.HasFlag(KeyModifiers.Shift))
+                {
+                    SelectedObjects.Add(view.Note);
+                }
+                else
+                {
+                    SelectedObjects.Clear();
+                    SelectedObjects.Add(view.Note);
+                }
+            }
+        }
+
+        private void OnWindowGainFocus(object? sender, RoutedEventArgs e)
+        {
+            SelectedObjects.Clear();
+        }
+
+        private void OnMouseDown(object? sender, PointerPressedEventArgs e)
+        {
+            IsMouseDown = true;
+        }
+        
+        private void OnMouseMove(object? sender, PointerEventArgs e)
+        {
+            var last = LastMousePosition;
+            LastMousePosition = e.GetPosition(this);
+
+            if (!IsMouseDown)
+                return;
+            
+            var delta = e.GetPosition(this) - last;
+
+            foreach (var selected in SelectedObjects)
+            {
+                selected.XPosition += delta.X;
+                selected.YPosition += delta.Y;
+            }
+            
+            LastMousePosition = e.GetPosition(this);
+        }
+        
+        private void OnMouseUp(object? sender, PointerReleasedEventArgs e)
+        {
+            IsMouseDown = false;
         }
     }
 }

@@ -6,7 +6,10 @@
         xmlns:pileRef="clr-namespace:PileRef"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="PileRef.MainWindow"
-        Title="PileRef">
+        Background="Transparent" Focusable="True" IsTabStop="False"
+        Title="PileRef"
+        GotFocus="OnWindowGainFocus"
+        PointerPressed="OnMouseDown">
         <ItemsControl x:Name="v_PileView" 
                       Background="DimGray" ItemsSource="{Binding Pile.AllObjects}" 
                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -45,8 +48,10 @@
                         <pileRef:PileObjectTemplateSelector>
                                 <DataTemplate x:Key="{x:Type model:Note}" DataType="model:Note">
                                         <pileRef:NoteView 
+                                                Note="{Binding $parent.DataContext}"
                                                 Width="{Binding $parent.DataContext.Width}" 
-                                                Height="{Binding $parent.DataContext.Height}">
+                                                Height="{Binding $parent.DataContext.Height}"
+                                                Selected="OnNoteSelected">
                                         </pileRef:NoteView>
                                 </DataTemplate>
                                 <DataTemplate x:Key="{x:Type model:IDocument}" DataType="model:IDocument">

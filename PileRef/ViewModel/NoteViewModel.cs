@@ -1,12 +1,10 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using PileRef.Model;
+﻿using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PileRef.ViewModel;
 
 public partial class NoteViewModel : ObservableObject
 {
-    [ObservableProperty] private Note? note;
-    [ObservableProperty] private bool editingTitle = true;
-    [ObservableProperty] private bool editingContent = true;
-    [ObservableProperty] private bool selected;
+    [ObservableProperty] private bool editingTitle;
+    [ObservableProperty] private bool editingContent;
 }
