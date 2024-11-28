@@ -8,11 +8,20 @@
         x:Class="PileRef.MainWindow"
         Background="Transparent" Focusable="True" IsTabStop="False"
         Title="PileRef"
+        Cursor="{Binding Cursor}"
         GotFocus="OnWindowGainFocus"
-        PointerPressed="OnMouseDown">
+        PointerPressed="OnMouseDown"
+        PointerWheelChanged="OnWheel">
         <ItemsControl x:Name="v_PileView" 
                       Background="DimGray" ItemsSource="{Binding Pile.AllObjects}" 
-                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                      Width="100000000000000" Height="100000000000000"
+                      RenderTransformOrigin="{Binding RenderOrigin}">
+                <ItemsControl.RenderTransform>
+                        <TransformGroup>
+                                <TranslateTransform X="{Binding PanX}" Y="{Binding PanY}"/>
+                                <ScaleTransform ScaleX="{Binding ZoomScale}" ScaleY="{Binding ZoomScale}"/>
+                        </TransformGroup>
+                </ItemsControl.RenderTransform>
                 <ItemsControl.ContextMenu>
                         <ContextMenu>
                                 <MenuItem PointerReleased="CreateNewNote" Header="New Note"></MenuItem>
@@ -49,16 +58,16 @@
                                 <DataTemplate x:Key="{x:Type model:Note}" DataType="model:Note">
                                         <pileRef:NoteView 
                                                 Note="{Binding $parent.DataContext}"
-                                                Width="{Binding $parent.DataContext.Width}" 
-                                                Height="{Binding $parent.DataContext.Height}"
-                                                Selected="OnNoteSelected">
+                                                IsEnabled="{Binding !IsPanning, RelativeSource={RelativeSource AncestorType=pileRef:MainWindow}}"
+                                                SelectedDown="OnNoteSelectedDown"
+                                                SelectedUp="OnNoteSelectedUp">
                                         </pileRef:NoteView>
                                 </DataTemplate>
                                 <DataTemplate x:Key="{x:Type model:IDocument}" DataType="model:IDocument">
                                         <pileRef:DocumentView 
+                                                IsEnabled="{Binding !IsPanning}"
                                                 Document="{Binding $parent.DataContext}"
-                                                Width="{Binding $parent.DataContext.Width}" 
-                                                Height="{Binding $parent.DataContext.Height}">
+                                                Selected="OnDocumentSelected">
                                         </pileRef:DocumentView>
                                 </DataTemplate>
                         </pileRef:PileObjectTemplateSelector>

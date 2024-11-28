@@ -16,6 +16,8 @@ namespace PileRef
     {
         private List<IPileObject> SelectedObjects { get; } = [];
         private bool IsMouseDown { get; set; }
+        private bool IsDragMouseDown { get; set; }
+        private bool WasDragging { get; set; }
         private Point LastMousePosition { get; set; }
         
         public MainWindowViewModel ViewModel { get; }
@@ -27,6 +29,8 @@ namespace PileRef
             
             InitializeComponent();
             
+            this.AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+            this.AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel, handledEventsToo: true);
             this.AddHandler(PointerPressedEvent, OnMouseDown, RoutingStrategies.Tunnel, handledEventsToo: true);
             this.AddHandler(PointerMovedEvent, OnMouseMove, RoutingStrategies.Tunnel, handledEventsToo: true);
             this.AddHandler(PointerReleasedEvent, OnMouseUp, RoutingStrategies.Tunnel, handledEventsToo: true);
@@ -129,37 +133,46 @@ namespace PileRef
             ViewModel.ChangesMade = false;
         }
 
-        private void OnNoteSelected(object? sender, RoutedEventArgs e)
+        private void OnNoteSelectedDown(object? sender, RoutedEventArgs e)
+        {
+            if (sender is not NoteView view)
+                return;
+            
+            HandlePileObjectSelect(view.Note, (PileObjectSelectedEventArgs)e, false);
+        }
+        
+        private void OnNoteSelectedUp(object? sender, RoutedEventArgs e)
         {
             if (sender is not NoteView view)
                 return;
 
-            var args = (NoteSelectedEventArgs)e;
-            var pointerArgs = args.PointerPressedArgs;
+            HandlePileObjectSelect(view.Note, (PileObjectSelectedEventArgs)e, true);
+        }
+        
+        private void OnDocumentSelected(object? sender, RoutedEventArgs e)
+        {
+            if (sender is not DocumentView view)
+                return;
 
-            if (SelectedObjects.Contains(view.Note))
+            var args = (PileObjectSelectedEventArgs)e;
+            
+            HandlePileObjectSelect(view.Document, args, false);
+        }
+
+        private void HandlePileObjectSelect(IPileObject pileObject, PileObjectSelectedEventArgs args, bool isReleasing)
+        {
+            IsDragMouseDown = !isReleasing;
+            
+            var pointerArgs = args.PointerArgs;
+            
+            if (SelectedObjects.Contains(pileObject))
             {
-                if (pointerArgs.KeyModifiers.HasFlag(KeyModifiers.Shift))
-                {
-                    SelectedObjects.Remove(view.Note);
-                }
-                else
-                {
-                    SelectedObjects.Clear();
-                    SelectedObjects.Add(view.Note);
-                }
+                SelectedObjects.Remove(pileObject);
             }
             else
             {
-                if (pointerArgs.KeyModifiers.HasFlag(KeyModifiers.Shift))
-                {
-                    SelectedObjects.Add(view.Note);
-                }
-                else
-                {
-                    SelectedObjects.Clear();
-                    SelectedObjects.Add(view.Note);
-                }
+                SelectedObjects.Clear();
+                SelectedObjects.Add(pileObject);
             }
         }
 
@@ -171,6 +184,7 @@ namespace PileRef
         private void OnMouseDown(object? sender, PointerPressedEventArgs e)
         {
             IsMouseDown = true;
+            WasDragging = false;
         }
         
         private void OnMouseMove(object? sender, PointerEventArgs e)
@@ -178,23 +192,57 @@ namespace PileRef
             var last = LastMousePosition;
             LastMousePosition = e.GetPosition(this);
 
+            var delta = e.GetPosition(this) - last;
+            
             if (!IsMouseDown)
                 return;
             
-            var delta = e.GetPosition(this) - last;
-
-            foreach (var selected in SelectedObjects)
+            if (ViewModel.IsPanning)
             {
-                selected.XPosition += delta.X;
-                selected.YPosition += delta.Y;
+                ViewModel.PanX += delta.X * ViewModel.DragScale;
+                ViewModel.PanY += delta.Y * ViewModel.DragScale;
+                
+                return;
             }
-            
+
+            WasDragging = true;
+
+            if (IsDragMouseDown)
+            {
+                foreach (var selected in SelectedObjects)
+                {
+                    selected.XPosition += delta.X * ViewModel.DragScale;
+                    selected.YPosition += delta.Y * ViewModel.DragScale;
+                }
+            }
+
             LastMousePosition = e.GetPosition(this);
         }
         
         private void OnMouseUp(object? sender, PointerReleasedEventArgs e)
         {
             IsMouseDown = false;
+        }
+
+        private void OnKeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                ViewModel.IsPanning = true;
+            }
+        }
+
+        private void OnKeyUp(object? sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
+            {
+                ViewModel.IsPanning = false;
+            }
+        }
+
+        private void OnWheel(object? sender, PointerWheelEventArgs e)
+        {
+            ViewModel.ZoomLevel += e.Delta.Y;
         }
     }
 }

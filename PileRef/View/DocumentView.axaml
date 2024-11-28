@@ -4,7 +4,8 @@
              xmlns:pileRef="clr-namespace:PileRef"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
              x:Class="PileRef.DocumentView"
-             PointerPressed="ControlPressed">
+             Width="{Binding Document.Width}"
+             Height="{Binding Document.Height}">
     <Grid RowDefinitions="Auto, *">
         <TextBox Grid.Row="0" x:Name="v_Title" 
                  IsReadOnly="{Binding !ViewModel.EditingTitle}" 
