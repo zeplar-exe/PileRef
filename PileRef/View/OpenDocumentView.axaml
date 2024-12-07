@@ -6,8 +6,13 @@
              Title="Open Document">
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
-            <TextBox Text="{Binding FilePath, Mode=TwoWay}"></TextBox>
+            <TextBox Text="{Binding Uri, Mode=TwoWay}"></TextBox>
             <Button Click="OpenFile">O</Button>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+            <Label>This is a</Label>
+            <RadioButton IsChecked="{Binding UriIsFile}" GroupName="uriType">File Path</RadioButton>
+            <RadioButton IsChecked="{Binding !UriIsFile}" GroupName="uriType">Website Link</RadioButton>
         </StackPanel>
         <Separator></Separator>
         

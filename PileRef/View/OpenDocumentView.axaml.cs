@@ -7,6 +7,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using PileRef.Model;
 using PileRef.ViewModel;
 using Encoding = System.Text.Encoding;
@@ -27,34 +28,70 @@ namespace PileRef
 
         private async void OpenFile(object? sender, RoutedEventArgs routedEventArgs)
         {
-            var dialog = new OpenFileDialog { AllowMultiple = false };
-            var file = await dialog.ShowAsync(this);
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false
+            });
             
-            if (file?.Length > 0)
-                ViewModel.FilePath = file[0];
+            if (files.Count > 0)
+                ViewModel.Uri = Uri.UnescapeDataString(files[0].Path.AbsolutePath);
         }
 
-        private void SelectDocument(object? sender, RoutedEventArgs routedEventArgs)
+        private async void SelectDocument(object? sender, RoutedEventArgs routedEventArgs)
         {
-            var fileData = File.ReadAllBytes(ViewModel.FilePath!);
+            var uri = new DocumentUri(new Uri(ViewModel.Uri), ViewModel.UriIsFile);
+            byte[] bytes;
+            
+            if (uri.IsFile)
+            {
+                bytes = await File.ReadAllBytesAsync(ViewModel.Uri);
+            }
+            else
+            {
+                bytes = await App.HttpClient.GetByteArrayAsync(ViewModel.Uri);
+            }
+
             IDocument? document = null;
 
             if (string.IsNullOrEmpty(ViewModel.Title))
                 ViewModel.Title = "Untitled Document";
 
-            if (ViewModel.DocumentType.IsTextEncodable)
+            if (ViewModel.DocumentType.Flags.HasFlag(DocumentFlags.TextEncodable))
             {
-                var text = ViewModel.Encoding.GetString(fileData);
+                var text = ViewModel.Encoding.GetString(bytes);
                 
                 if (ViewModel.DocumentType == DocumentTypeEnum.Markdown) 
-                    document = new MarkdownDocument { Title = ViewModel.Title, Content = text };
+                    document = new MarkdownDocument(text, uri);
                 else if (ViewModel.DocumentType == DocumentTypeEnum.PlainText) 
-                    document = new PlainTextDocument { Title = ViewModel.Title, Content = text };
+                    document = new PlainTextDocument(text, uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.Latex)
+                    document = new LatexDocument(text, uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.Html)
+                    document = new HtmlDocument(text, uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.DOC)
+                    document = new DocDocument(uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.DOCX)
+                    document = new DocxDocument(uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.ODT)
+                    document = new OdtDocument(uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.SVG)
+                    document = new SvgDocument(text, uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.PAGES)
+                    document = new PagesDocument(uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.RTF)
+                    document = new RichTextDocument(text, uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.XPS)
+                    document = new XpsDocument(uri);
             }
             else
             {
-                
+                if (ViewModel.DocumentType == DocumentTypeEnum.PDF)
+                    document = new PilePdfDocument(uri);
+                else if (ViewModel.DocumentType == DocumentTypeEnum.EPUB)
+                    document = new EpubDocument(bytes, uri);
             }
+
+            document.Title = ViewModel.Title;
 
             Close(document);
         }

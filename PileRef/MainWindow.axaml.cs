@@ -5,6 +5,9 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PileRef.Model;
@@ -32,105 +35,57 @@ namespace PileRef
             this.AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
             this.AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel, handledEventsToo: true);
             this.AddHandler(PointerPressedEvent, OnMouseDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+            this.AddHandler(PointerPressedEvent, OnMouseDownBubble, RoutingStrategies.Bubble, handledEventsToo: true);
             this.AddHandler(PointerMovedEvent, OnMouseMove, RoutingStrategies.Tunnel, handledEventsToo: true);
             this.AddHandler(PointerReleasedEvent, OnMouseUp, RoutingStrategies.Tunnel, handledEventsToo: true);
+            this.AddHandler(PointerReleasedEvent, OnMouseUpBubble, RoutingStrategies.Bubble, handledEventsToo: true);
         }
 
-        private void CreateNewNote(object? sender, PointerReleasedEventArgs e)
+        private void OnCreateNoteReleased(object? sender, PointerReleasedEventArgs e)
         {
             var menu = (sender as MenuItem)!;
             var pos = v_PileView.PointToClient(menu.PointToScreen(new Point(0, 0)));
-            
-            var note = new Note
-            {
-                Title = "Untitled Note",
-                XPosition = pos.X,
-                YPosition = pos.Y,
-                Width = 280,
-                Height = 300,
-            };
 
-            ViewModel.Pile ??= new Pile();
-            ViewModel.Pile.Notes.Add(note);
+            ViewModel.CreateNote(pos);
         }
-
-        private async void OpenDocument(object? sender, PointerReleasedEventArgs e)
+        
+        private void OnOpenDocumentReleased(object? sender, PointerReleasedEventArgs e)
         {
             var menu = (sender as MenuItem)!;
             var pos = v_PileView.PointToClient(menu.PointToScreen(new Point(0, 0)));
-            
-            var dialog = new OpenDocumentView();
-            var document = await dialog.ShowDialog<IDocument?>(this);
-            
-            if (document == null)
-                return;
 
-            document.XPosition = pos.X;
-            document.YPosition = pos.Y;
-            document.Width = 280;
-            document.Height = 300;
-
-            ViewModel.Pile ??= new Pile();
-            ViewModel.Pile.Documents.Add(document);
+            ViewModel.OpenDocument(pos, this);
+        }
+        
+        private void OnSaveReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            ViewModel.SavePile(StorageProvider);
         }
 
-        private void CreateNewPile(object? sender, PointerReleasedEventArgs e)
+        private async void OnCreatePileReleased(object? sender, PointerReleasedEventArgs e)
         {
             if (ViewModel.ChangesMade)
-                ; // Warn
+            {
+                var result = await MessageBoxManager.GetMessageBoxStandard(
+                    "Create New Pile", "The current pile has unsaved changes. Would you like to save?",
+                    ButtonEnum.YesNoCancel).ShowAsync();
 
-            ViewModel.Pile = new Pile();
-            ViewModel.PileFilePath = null;
+                if (result == ButtonResult.Yes)
+                {
+                    ViewModel.SavePile(StorageProvider);
+                }
+                else if (result != ButtonResult.No)
+                {
+                    return;
+                }
+            }
+            
+            ViewModel.CreatePile();
         }
 
-        private async void OpenPile(object? sender, PointerReleasedEventArgs e)
+        private async void OnOpenPileReleased(object? sender, PointerReleasedEventArgs e)
         {
-            var filter = new FileDialogFilter { Name = "PileRef Save File", Extensions = ["pile"] };
-            var dialog = new OpenFileDialog();
-            dialog.Filters.Add(filter);
-            dialog.AllowMultiple = false;
-
-            var result = await dialog.ShowAsync(this);
-            
-            if (result == null || result.Length == 0)
-                return;
-
-            var path = result[0];
-            
-            using var text = File.OpenText(path);
-            await using var reader = new JsonTextReader(text);
-            
-            var json = await JToken.ReadFromAsync(reader);
-            
-            if (ViewModel.PileFilePath != null)
-                ViewModel.RecentPiles.Add(ViewModel.PileFilePath);
-            
-            ViewModel.Pile = json.ToObject<Pile>();
-            ViewModel.PileFilePath = path;
-            ViewModel.ChangesMade = false;
-        }
-
-        private async void SavePile(object? sender, PointerReleasedEventArgs e)
-        {
-            ViewModel.Pile ??= new Pile();
-            
-            var filter = new FileDialogFilter { Name = "PileRef Save File", Extensions = ["pile"] };
-            var dialog = new SaveFileDialog { DefaultExtension = ".pile" };
-            dialog.Filters.Add(filter);
-
-            var path = await dialog.ShowAsync(this);
-            
-            if (string.IsNullOrEmpty(path))
-                return;
-            
-            var json = ViewModel.Pile.ToJson();
-
-            await using var text = new StreamWriter(path);
-            await using var writer = new JsonTextWriter(text);
-            await json.WriteToAsync(writer);
-
-            ViewModel.PileFilePath = path;
-            ViewModel.ChangesMade = false;
+            ViewModel.OpenPile(StorageProvider);
         }
 
         private void OnNoteSelectedDown(object? sender, RoutedEventArgs e)
@@ -187,6 +142,12 @@ namespace PileRef
             WasDragging = false;
         }
         
+        private void OnMouseDownBubble(object? sender, PointerPressedEventArgs e)
+        {
+            ViewModel.IsPanning = true;
+            SelectedObjects.Clear();
+        }
+        
         private void OnMouseMove(object? sender, PointerEventArgs e)
         {
             var last = LastMousePosition;
@@ -222,6 +183,11 @@ namespace PileRef
         private void OnMouseUp(object? sender, PointerReleasedEventArgs e)
         {
             IsMouseDown = false;
+        }
+        
+        private void OnMouseUpBubble(object? sender, PointerReleasedEventArgs e)
+        {
+            ViewModel.IsPanning = false;
         }
 
         private void OnKeyDown(object? sender, KeyEventArgs e)

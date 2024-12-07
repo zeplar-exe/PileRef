@@ -1,15 +1,17 @@
-﻿namespace PileRef.Model;
+﻿using System.Collections.Generic;
+
+namespace PileRef.Model;
 
 public class DocumentType
 {
     public string Name { get; }
-    public bool IsTextEncodable { get; }
-    public bool HorizontalResizable { get; }
+    public HashSet<string> Extensions { get; }
+    public DocumentFlags Flags { get; }
 
-    public DocumentType(string name, bool isTextEncodable, bool horizontalResizable)
+    public DocumentType(string name, string[] extensions, DocumentFlags flags = DocumentFlags.None)
     {
         Name = name;
-        IsTextEncodable = isTextEncodable;
-        HorizontalResizable = horizontalResizable;
+        Extensions = new HashSet<string>(extensions);
+        Flags = flags;
     }
 }

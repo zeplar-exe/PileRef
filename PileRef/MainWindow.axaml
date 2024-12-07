@@ -24,12 +24,12 @@
                 </ItemsControl.RenderTransform>
                 <ItemsControl.ContextMenu>
                         <ContextMenu>
-                                <MenuItem PointerReleased="CreateNewNote" Header="New Note"></MenuItem>
-                                <MenuItem PointerReleased="OpenDocument" Header="Open Document"></MenuItem>
+                                <MenuItem PointerReleased="OnCreateNoteReleased" Header="New Note"></MenuItem>
+                                <MenuItem PointerReleased="OnOpenDocumentReleased" Header="Open Document"></MenuItem>
                                 <Separator></Separator>
-                                <MenuItem PointerReleased="CreateNewPile" Header="New Pile"></MenuItem>
-                                <MenuItem PointerReleased="SavePile" Header="Save Pile"></MenuItem>
-                                <MenuItem PointerReleased="OpenPile" Header="Open Pile..."></MenuItem>
+                                <MenuItem PointerReleased="OnCreatePileReleased" Header="New Pile"></MenuItem>
+                                <MenuItem PointerReleased="OnSaveReleased" Header="Save Pile"></MenuItem>
+                                <MenuItem PointerReleased="OnOpenPileReleased" Header="Open Pile..."></MenuItem>
                                 <MenuItem Header="Open Recent Pile" ItemsSource="{Binding RecentPiles}">
                                         <MenuItem.ItemTemplate>
                                                 <DataTemplate DataType="x:String">

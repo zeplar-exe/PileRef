@@ -56,10 +56,8 @@ public partial class Pile : ObservableObject
                 deserialized = document.ToObject<MarkdownDocument>()!;
             else if (type == DocumentTypeEnum.PlainText.Name)
                 deserialized = document.ToObject<PlainTextDocument>()!;
-            else if (type == DocumentTypeEnum.Binary.Name)
-                throw new NotImplementedException();
-            else if (type == DocumentTypeEnum.Hexadecimal.Name)
-                throw new NotImplementedException();
+            else if (type == DocumentTypeEnum.PDF.Name)
+                deserialized = document.ToObject<PilePdfDocument>()!;
             else
                 continue;
 
