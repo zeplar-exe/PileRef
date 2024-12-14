@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PileRef.Model;
@@ -6,9 +7,20 @@ namespace PileRef.Model;
 public abstract partial class TextDocumentBase : DocumentBase
 {
     [ObservableProperty] private string content;
+    [ObservableProperty] private Encoding encoding;
     
-    protected TextDocumentBase(string content, DocumentUri uri) : base(uri)
+    protected TextDocumentBase(Stream stream, DocumentUri uri, Encoding encoding) : base(uri, stream)
     {
-        Content = content;
+        Encoding = encoding;
+        
+        Update();
+    }
+
+    public sealed override async void Update()
+    {
+        Stream.Seek(0, SeekOrigin.Begin);
+        var reader = new StreamReader(Stream, Encoding);
+        
+        Content = await reader.ReadToEndAsync();
     }
 }

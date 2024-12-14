@@ -7,19 +7,15 @@ namespace PileRef.Model;
 
 public class PilePdfDocument : DocumentBase
 {
-    public Stream Stream { get; }
-    public PdfDocument Document { get; }
-
-    public static async Task<PilePdfDocument> Create(DocumentUri uri)
+    public PdfDocument Document { get; private set; }
+    
+    public PilePdfDocument(Stream stream, DocumentUri uri) : base(uri, stream)
     {
-        var stream = await ReadUriAsync(uri);
-
-        return new PilePdfDocument(stream, uri);
+        Document = PdfDocument.Load(stream);
     }
     
-    protected PilePdfDocument(Stream stream, DocumentUri uri) : base(uri)
+    public override void Update()
     {
-        Stream = stream;
-        Document = PdfDocument.Load(stream);
+        Document = PdfDocument.Load(Stream);
     }
 }

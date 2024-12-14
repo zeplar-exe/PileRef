@@ -10,6 +10,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using PileRef.Model;
 using PileRef.ViewModel;
+using DocumentBase = PileRef.Model.DocumentBase;
 using Encoding = System.Text.Encoding;
 
 namespace PileRef
@@ -40,54 +41,44 @@ namespace PileRef
         private async void SelectDocument(object? sender, RoutedEventArgs routedEventArgs)
         {
             var uri = new DocumentUri(ViewModel.Uri, ViewModel.UriIsFile);
-            byte[] bytes;
-            
-            if (uri.IsFile)
-            {
-                bytes = await File.ReadAllBytesAsync(ViewModel.Uri);
-            }
-            else
-            {
-                bytes = await App.HttpClient.GetByteArrayAsync(ViewModel.Uri);
-            }
+            var stream = await uri.OpenAsync();
 
             DocumentBase? document = null;
 
             if (string.IsNullOrEmpty(ViewModel.Title))
                 ViewModel.Title = "Untitled Document";
 
-            if (ViewModel.DocumentType.Flags.HasFlag(DocumentFlags.TextEncodable))
-            {
-                var text = ViewModel.Encoding.GetString(bytes);
-                
-                if (ViewModel.DocumentType == DocumentTypeEnum.Markdown) 
-                    document = new MarkdownDocument(text, uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.PlainText) 
-                    document = new PlainTextDocument(text, uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.Latex)
-                    document = new LatexDocument(text, uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.DOC)
-                    document = new DocDocument(uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.DOCX)
-                    document = new DocxDocument(uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.ODT)
-                    document = new OdtDocument(uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.SVG)
-                    document = new SvgDocument(text, uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.PAGES)
-                    document = new PagesDocument(uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.RTF)
-                    document = new RichTextDocument(text, uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.XPS)
-                    document = new XpsDocument(uri);
-            }
-            else
-            {
-                if (ViewModel.DocumentType == DocumentTypeEnum.PDF)
-                    document = await PilePdfDocument.Create(uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.EPUB)
-                    document = new EpubDocument(bytes, uri);
-            }
+            if (ViewModel.DocumentType == DocumentTypeEnum.Markdown) 
+                document = new MarkdownDocument(stream, uri, ViewModel.Encoding);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.PlainText) 
+                document = new PlainTextDocument(stream, uri, ViewModel.Encoding);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.Latex)
+                document = new LatexDocument(stream, uri, ViewModel.Encoding);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.DOC)
+                document = new OldWordDocument(stream, uri, ViewModel.Encoding);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.ODT)
+                document = new OdtDocument(stream, uri);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.SVG)
+                document = new SvgDocument(stream, uri, ViewModel.Encoding);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.PAGES)
+                document = new PagesDocument(stream, uri);
+            // https://web.archive.org/web/20241120144313/https://www.tempmail.us.com/en/iwork/effortlessly-accessing-pages-and-numbers-files-with-c-on-windows
+            else if (ViewModel.DocumentType == DocumentTypeEnum.RTF)
+                document = new RichTextDocument(stream, uri, ViewModel.Encoding);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.XPS)
+                document = new XpsDocument(stream, uri);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.PDF)
+                document = new PilePdfDocument(stream, uri);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.EPUB)
+                document = new EpubDocument(stream, uri);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.PNG)
+                document = new ImageDocument(stream, uri);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.JPG)
+                document = new ImageDocument(stream, uri);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.BMP)
+                document = new ImageDocument(stream, uri);
+            else if (ViewModel.DocumentType == DocumentTypeEnum.DOCX)
+                document = new XmlWordDocument(stream, uri);
 
             document.Title = ViewModel.Title;
 

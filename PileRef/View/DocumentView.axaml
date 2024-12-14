@@ -4,7 +4,7 @@
              xmlns:pileRef="clr-namespace:PileRef"
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
              xmlns:controls="clr-namespace:AvaloniaMath.Controls;assembly=AvaloniaMath"
-             xmlns:svg="clr-namespace:Avalonia.Skia;assembly=Avalonia.Skia"
+             xmlns:svg=":clr-namespace:Avalonia.Skia;assembly=Avalonia.Svg.Svg"
              xmlns:document="clr-namespace:PileRef.View.Document"
              x:Class="PileRef.DocumentView"
              Width="{Binding Document.Width}"
@@ -34,15 +34,16 @@
                         <document:PdfDocumentView Document="{Binding}"/>
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:SvgDocument}" DataType="model:SvgDocument">
-                        
+                        <Image>
+                            <Image.Source>
+                                <SvgImage Source="{Binding Uri.Path}"></SvgImage>
+                            </Image.Source>
+                        </Image>
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:EpubDocument}" DataType="model:EpubDocument">
                         
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:RichTextDocument}" DataType="model:RichTextDocument">
-                        
-                    </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:WordDocument}" DataType="model:WordDocument">
                         
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:OdtDocument}" DataType="model:OdtDocument">
@@ -54,11 +55,14 @@
                     <DataTemplate x:Key="{x:Type pileRef:PagesDocument}" DataType="pileRef:PagesDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type pileRef:DocxDocument}" DataType="pileRef:DocxDocument">
+                    <DataTemplate x:Key="{x:Type pileRef:OldWordDocument}" DataType="pileRef:OldWordDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type pileRef:DocDocument}" DataType="pileRef:DocDocument">
+                    <DataTemplate x:Key="{x:Type model:XmlWordDocument}" DataType="model:XmlWordDocument">
                         
+                    </DataTemplate>
+                    <DataTemplate x:Key="{x:Type model:ImageDocument}" DataType="model:ImageDocument">
+                        <Image Source="{Binding Image}" Stretch="UniformToFill" StretchDirection="Both"></Image>
                     </DataTemplate>
                 </pileRef:ObjectTemplateSelector>
             </ContentControl.ContentTemplate>

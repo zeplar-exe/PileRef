@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -13,26 +14,33 @@ public abstract partial class DocumentBase : ObservableObject, IPileObject
     [ObservableProperty] private double width;
     [ObservableProperty] private double height;
     
-    protected DocumentBase(DocumentUri uri)
+    protected Stream Stream { get; }
+    
+    protected DocumentBase(DocumentUri uri, Stream stream)
     {
         Uri = uri;
-    }
-
-    protected static async Task<Stream> ReadUriAsync(DocumentUri uri)
-    {
-        Stream stream;
+        Stream = stream;
         
-        if (uri.IsFile)
+        var watcher = new FileSystemWatcher
         {
-            stream = File.OpenRead(uri.Path);
-        }
-        else
-        {
-            var response = await App.HttpClient.GetAsync(System.Uri.EscapeDataString(uri.Path));
+            Path = Path.GetDirectoryName(uri.Path)!, Filter = Path.GetFileName(uri.Path),
+            EnableRaisingEvents = true
+        };
             
-            stream = await response.Content.ReadAsStreamAsync();
-        }
-
-        return stream;
+        watcher.Changed += (_, args) =>
+        {
+            try
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                Update();
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        };
     }
+
+    public abstract void Update();
 }

@@ -1,9 +1,16 @@
-﻿namespace PileRef.Model;
+﻿using System.IO;
 
-public class EpubDocument : BinaryDocumentBase
+namespace PileRef.Model;
+
+public class EpubDocument : DocumentBase
 {
-    public EpubDocument(byte[] content, DocumentUri uri) : base(content, uri)
+    public EpubDocument(Stream stream, DocumentUri uri) : base(uri, stream)
     {
         
+    }
+
+    public override void Update()
+    {
+        throw new System.NotImplementedException();
     }
 }

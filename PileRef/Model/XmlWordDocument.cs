@@ -1,10 +1,11 @@
 ﻿using System.IO;
+using System.Reflection.Metadata;
 
 namespace PileRef.Model;
 
-public class XpsDocument : DocumentBase
+public class XmlWordDocument : DocumentBase
 {
-    public XpsDocument(Stream stream, DocumentUri uri) : base(uri, stream)
+    public XmlWordDocument(Stream stream, DocumentUri uri) : base(uri, stream)
     {
         
     }
