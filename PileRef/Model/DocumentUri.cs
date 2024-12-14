@@ -4,12 +4,12 @@ namespace PileRef.Model;
 
 public class DocumentUri
 {
-    public Uri Uri { get; }
+    public string Path { get; }
     public bool IsFile { get; }
 
-    public DocumentUri(Uri uri, bool isFile)
+    public DocumentUri(string path, bool isFile)
     {
-        Uri = uri;
+        Path = path;
         IsFile = isFile;
     }
 }

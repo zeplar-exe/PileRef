@@ -39,7 +39,7 @@ namespace PileRef
 
         private async void SelectDocument(object? sender, RoutedEventArgs routedEventArgs)
         {
-            var uri = new DocumentUri(new Uri(ViewModel.Uri), ViewModel.UriIsFile);
+            var uri = new DocumentUri(ViewModel.Uri, ViewModel.UriIsFile);
             byte[] bytes;
             
             if (uri.IsFile)
@@ -51,7 +51,7 @@ namespace PileRef
                 bytes = await App.HttpClient.GetByteArrayAsync(ViewModel.Uri);
             }
 
-            IDocument? document = null;
+            DocumentBase? document = null;
 
             if (string.IsNullOrEmpty(ViewModel.Title))
                 ViewModel.Title = "Untitled Document";
@@ -66,8 +66,6 @@ namespace PileRef
                     document = new PlainTextDocument(text, uri);
                 else if (ViewModel.DocumentType == DocumentTypeEnum.Latex)
                     document = new LatexDocument(text, uri);
-                else if (ViewModel.DocumentType == DocumentTypeEnum.Html)
-                    document = new HtmlDocument(text, uri);
                 else if (ViewModel.DocumentType == DocumentTypeEnum.DOC)
                     document = new DocDocument(uri);
                 else if (ViewModel.DocumentType == DocumentTypeEnum.DOCX)
@@ -86,7 +84,7 @@ namespace PileRef
             else
             {
                 if (ViewModel.DocumentType == DocumentTypeEnum.PDF)
-                    document = new PilePdfDocument(uri);
+                    document = await PilePdfDocument.Create(uri);
                 else if (ViewModel.DocumentType == DocumentTypeEnum.EPUB)
                     document = new EpubDocument(bytes, uri);
             }

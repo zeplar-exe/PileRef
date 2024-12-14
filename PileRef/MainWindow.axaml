@@ -54,7 +54,7 @@
                 </ItemsControl.Styles>
                 
                 <ItemsControl.ItemTemplate>
-                        <pileRef:PileObjectTemplateSelector>
+                        <pileRef:ObjectTemplateSelector>
                                 <DataTemplate x:Key="{x:Type model:Note}" DataType="model:Note">
                                         <pileRef:NoteView 
                                                 Note="{Binding $parent.DataContext}"
@@ -63,14 +63,14 @@
                                                 SelectedUp="OnNoteSelectedUp">
                                         </pileRef:NoteView>
                                 </DataTemplate>
-                                <DataTemplate x:Key="{x:Type model:IDocument}" DataType="model:IDocument">
+                                <DataTemplate x:Key="{x:Type model:DocumentBase}" DataType="model:DocumentBase">
                                         <pileRef:DocumentView 
                                                 IsEnabled="{Binding !IsPanning}"
                                                 Document="{Binding $parent.DataContext}"
                                                 Selected="OnDocumentSelected">
                                         </pileRef:DocumentView>
                                 </DataTemplate>
-                        </pileRef:PileObjectTemplateSelector>
+                        </pileRef:ObjectTemplateSelector>
                 </ItemsControl.ItemTemplate>
         </ItemsControl>
 </Window>

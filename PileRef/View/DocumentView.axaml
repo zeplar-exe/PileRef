@@ -5,7 +5,6 @@
              xmlns:mdxaml="https://github.com/whistyun/Markdown.Avalonia"
              xmlns:controls="clr-namespace:AvaloniaMath.Controls;assembly=AvaloniaMath"
              xmlns:svg="clr-namespace:Avalonia.Skia;assembly=Avalonia.Skia"
-             xmlns:avalonia="clr-namespace:Xilium.CefGlue.Avalonia;assembly=Xilium.CefGlue.Avalonia"
              xmlns:document="clr-namespace:PileRef.View.Document"
              x:Class="PileRef.DocumentView"
              Width="{Binding Document.Width}"
@@ -19,7 +18,7 @@
                         Content="{Binding Document}" 
                         Background="White" BorderThickness="1" BorderBrush="Gray">
             <ContentControl.ContentTemplate>
-                <pileRef:PileObjectTemplateSelector>
+                <pileRef:ObjectTemplateSelector>
                     <DataTemplate x:Key="{x:Type model:MarkdownDocument}" DataType="model:MarkdownDocument">
                         <mdxaml:MarkdownScrollViewer Cursor="IBeam" SelectionEnabled="True"
                                                      Markdown="{Binding Content}"/>
@@ -32,7 +31,7 @@
                         <controls:FormulaBlock Formula="{Binding Content}"/>
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:PilePdfDocument}" DataType="model:PilePdfDocument">
-                        <document:PdfDocumentView Address="{Binding Uri.Uri.AbsolutePath}"/>
+                        <document:PdfDocumentView Document="{Binding}"/>
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:SvgDocument}" DataType="model:SvgDocument">
                         
@@ -49,13 +48,7 @@
                     <DataTemplate x:Key="{x:Type model:OdtDocument}" DataType="model:OdtDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:HtmlDocument}" DataType="model:HtmlDocument">
-                        
-                    </DataTemplate>
                     <DataTemplate x:Key="{x:Type model:XpsDocument}" DataType="model:XpsDocument">
-                        
-                    </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:EpubDocument}" DataType="model:EpubDocument">
                         
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type pileRef:PagesDocument}" DataType="pileRef:PagesDocument">
@@ -67,7 +60,7 @@
                     <DataTemplate x:Key="{x:Type pileRef:DocDocument}" DataType="pileRef:DocDocument">
                         
                     </DataTemplate>
-                </pileRef:PileObjectTemplateSelector>
+                </pileRef:ObjectTemplateSelector>
             </ContentControl.ContentTemplate>
         </ContentControl>
     </Grid>

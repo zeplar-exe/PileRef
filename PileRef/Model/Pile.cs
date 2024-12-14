@@ -10,7 +10,7 @@ namespace PileRef.Model;
 
 public partial class Pile : ObservableObject
 {
-    public ObservableCollection<IDocument> Documents { get; private init; } = [];
+    public ObservableCollection<DocumentBase> Documents { get; private init; } = [];
     public ObservableCollection<Note> Notes { get; private init; } = [];
     
     public IEnumerable<IPileObject> AllObjects => Documents.Concat<IPileObject>(Notes);
@@ -41,7 +41,7 @@ public partial class Pile : ObservableObject
         if (documents?.Type != JTokenType.Array)
             return new Pile { Notes = new ObservableCollection<Note>(notes) };
 
-        var deserializedDocuments = new List<IDocument>();
+        var deserializedDocuments = new List<DocumentBase>();
 
         foreach (var document in documents)
         {
@@ -50,7 +50,7 @@ public partial class Pile : ObservableObject
             if (type == null)
                 continue;
 
-            IDocument deserialized;
+            DocumentBase deserialized;
 
             if (type == DocumentTypeEnum.Markdown.Name)
                 deserialized = document.ToObject<MarkdownDocument>()!;
@@ -66,7 +66,7 @@ public partial class Pile : ObservableObject
         
         return new Pile { 
             Notes = new ObservableCollection<Note>(notes), 
-            Documents = new ObservableCollection<IDocument>(deserializedDocuments) 
+            Documents = new ObservableCollection<DocumentBase>(deserializedDocuments) 
         };
     }
 }

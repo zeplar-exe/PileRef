@@ -11,18 +11,18 @@ using PileRef.ViewModel;
 
 namespace PileRef
 {
-    public partial class DocumentView : UserControl
+    public partial class DocumentView : ObjectViewBase<DocumentView>
     {
         public DocumentViewModel ViewModel { get; }
         
-        public IDocument Document
+        public DocumentBase Document
         {
             get => GetValue(DocumentProperty); 
             set => SetValue(DocumentProperty, value); 
         }
         
-        public static readonly StyledProperty<IDocument> DocumentProperty =
-            AvaloniaProperty.Register<DocumentView, IDocument>(nameof(Document));
+        public static readonly StyledProperty<DocumentBase> DocumentProperty =
+            AvaloniaProperty.Register<DocumentView, DocumentBase>(nameof(Document));
         
         public static readonly RoutedEvent<PointerPressedEventArgs> SelectedEvent =
             RoutedEvent.Register<DocumentView, PointerPressedEventArgs>(nameof(Selected), RoutingStrategies.Direct);

@@ -25,10 +25,14 @@ namespace PileRef
         
         public MainWindowViewModel ViewModel { get; }
         
+        public static float Dpi { get; set; }
+        
         public MainWindow()
         {
             ViewModel = new MainWindowViewModel();
             DataContext = ViewModel;
+            
+            Dpi = (float)(96f * RenderScaling);
             
             InitializeComponent();
             

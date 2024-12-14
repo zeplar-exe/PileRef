@@ -2,6 +2,49 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:pileRef="clr-namespace:PileRef"
+             xmlns:viewModel="clr-namespace:PileRef.ViewModel"
+             xmlns:model="clr-namespace:PileRef.Model"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PileRef.View.Document.PdfDocumentView">
+    <UserControl.ContentTemplate>
+        <pileRef:ObjectTemplateSelector>
+            <DataTemplate x:Key="{x:Type viewModel:PaginatedPdfDocumentViewModel}" DataType="viewModel:PaginatedPdfDocumentViewModel">
+                <Grid RowDefinitions="*, Auto">
+                    <Image Grid.Row="0" StretchDirection="Both" Stretch="UniformToFill" Source="{Binding CurrentPageImage}"></Image>
+                    <ItemsControl Grid.Row="0" ItemsSource="{Binding TextBlocks}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas></Canvas>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.Styles>
+                            <Style Selector="ItemsControl > ContentPresenter" x:DataType="model:PdfTextBlock">
+                                <Setter Property="Canvas.Top" Value="{Binding Path=Rect.Y}" />
+                                <Setter Property="Canvas.Left" Value="{Binding Path=Rect.X}" />
+                            </Style>
+                        </ItemsControl.Styles>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Width="{Binding Rect.Width}" 
+                                           Height="{Binding Rect.Height}"
+                                           Background="Blue"
+                                           Text="{Binding Text}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <Button Command="{Binding PreviousPageCommand}">Prev</Button>
+                        <Label Content="{Binding CurrentPageFormatted}"></Label>
+                        <Button Command="{Binding NextPageCommand}">Next</Button>
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="{x:Type viewModel:ScrollPdfDocumentViewModel}" DataType="viewModel:ScrollPdfDocumentViewModel">
+                <ScrollViewer>
+            
+                </ScrollViewer>
+            </DataTemplate>
+        </pileRef:ObjectTemplateSelector>
+    </UserControl.ContentTemplate>
 </UserControl>

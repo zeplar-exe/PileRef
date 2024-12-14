@@ -95,7 +95,7 @@ public partial class MainWindowViewModel : ObservableObject
     public async void OpenDocument(Point position, Window dialogOwner)
     {
         var dialog = new OpenDocumentView();
-        var document = await dialog.ShowDialog<IDocument?>(dialogOwner);
+        var document = await dialog.ShowDialog<DocumentBase?>(dialogOwner);
             
         if (document == null)
             return;

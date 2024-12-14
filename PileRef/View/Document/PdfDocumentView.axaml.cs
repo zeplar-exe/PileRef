@@ -1,42 +1,36 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Xilium.CefGlue.Avalonia;
+using PileRef.Model;
+using PileRef.ViewModel;
 
 namespace PileRef.View.Document;
 
 public partial class PdfDocumentView : UserControl
 {
-    private AvaloniaCefBrowser Browser { get; }
+    public static readonly StyledProperty<PilePdfDocument> DocumentProperty = AvaloniaProperty.Register<PdfDocumentView, PilePdfDocument>(
+        nameof(Document));
 
-    public static readonly StyledProperty<string> AddressProperty = AvaloniaProperty.Register<PdfDocumentView, string>(
-        nameof(Address));
-
-    public string Address
+    public PilePdfDocument Document
     {
-        get => GetValue(AddressProperty);
-        set => SetValue(AddressProperty, value);
+        get => GetValue(DocumentProperty);
+        set => SetValue(DocumentProperty, value);
     }
     
     public PdfDocumentView()
     {
         InitializeComponent();
-
-        Browser = new AvaloniaCefBrowser
-        {
-            
-        };
-        
-        Content = Browser;
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
         
-        if (change.Property != AddressProperty)
+        if (change.Property != DocumentProperty)
             return;
         
-        Browser.Address = change.NewValue?.ToString() ?? string.Empty;
+        if (change.NewValue == null)
+            Content = null;
+        else if (true)
+            Content = new PaginatedPdfDocumentViewModel((change.NewValue as PilePdfDocument)!, this);
     }
 }

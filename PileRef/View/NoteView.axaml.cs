@@ -11,9 +11,7 @@ using PileRef.ViewModel;
 namespace PileRef
 {
     public partial class NoteView : ObjectViewBase<NoteView>
-    { // just get rid of the vm?
-        // thinking of handling "convert to document" via 
-        //   left click to select -> right clcik -> convert selection to document
+    {
         public NoteViewModel ViewModel { get; }
         
         public Note Note
@@ -33,9 +31,9 @@ namespace PileRef
             InitializeComponent();
             
             v_Title.AddHandler(PointerPressedEvent, PressedTitleEdit, RoutingStrategies.Tunnel);
-            v_Title.AddHandler(KeyDownEvent, OnTextKeyDown, RoutingStrategies.Tunnel);
+            v_Title.AddHandler(KeyDownEvent, OnContentKeyDown, RoutingStrategies.Tunnel);
             v_Content.AddHandler(PointerPressedEvent, PressedContentEdit, RoutingStrategies.Tunnel);
-            v_Content.AddHandler(KeyDownEvent, OnTextKeyDown, RoutingStrategies.Tunnel);
+            v_Content.AddHandler(KeyDownEvent, OnContentKeyDown, RoutingStrategies.Tunnel);
         }
 
         private void PressedTitleEdit(object? sender, PointerPressedEventArgs e)
@@ -45,8 +43,11 @@ namespace PileRef
 
         private void TitleEditLostFocus(object? sender, RoutedEventArgs e)
         {
-            ViewModel.EditingTitle = false;
-            ViewModel.EditingContent = false;
+            if (!ViewModel.EditingContent)
+            {
+                ViewModel.EditingTitle = false;
+                ViewModel.EditingContent = false;
+            }
         }
         
         private void PressedContentEdit(object? sender, PointerPressedEventArgs e)
@@ -59,12 +60,31 @@ namespace PileRef
             ViewModel.EditingTitle = false;
             ViewModel.EditingContent = false;
         }
-
-        private void OnTextKeyDown(object? sender, KeyEventArgs e)
+        
+        private void OnTitleKeyDown(object? sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Escape)
+            switch (e.Key)
             {
-                TopLevel.GetTopLevel(this)!.Focus();
+                case Key.Enter:
+                    ViewModel.EditingTitle = false;
+                    ViewModel.EditingContent = true;
+                    v_Content.IsReadOnly = false;
+                    v_Content.Focusable = true;
+                    v_Content.Focus();
+                    break;
+                case Key.Escape:
+                    TopLevel.GetTopLevel(this)!.Focus();
+                    break;
+            }
+        }
+
+        private void OnContentKeyDown(object? sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.Escape:
+                    TopLevel.GetTopLevel(this)!.Focus();
+                    break;
             }
         }
     }

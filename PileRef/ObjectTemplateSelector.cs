@@ -8,7 +8,7 @@ using PileRef.Model;
 
 namespace PileRef;
 
-public class PileObjectTemplateSelector : IDataTemplate
+public class ObjectTemplateSelector : IDataTemplate
 {
     [Content]
     public Dictionary<Type, IDataTemplate> Templates { get; } = new();
@@ -45,6 +45,6 @@ public class PileObjectTemplateSelector : IDataTemplate
 
     public bool Match(object? data)
     {
-        return data != null && data.GetType().IsAssignableTo(typeof(IPileObject));
+        return data != null;
     }
 }

@@ -9,6 +9,7 @@
                  Focusable="{Binding ViewModel.EditingTitle}"
                  HorizontalAlignment="Stretch" TextAlignment="Center" 
                  Text="{Binding Note.Title, Mode=TwoWay}"
+                 KeyDown="OnTitleKeyDown"
                  LostFocus="TitleEditLostFocus"></TextBox>
         <ContentControl Grid.Row="1">
             <TextBox x:Name="v_Content" 
