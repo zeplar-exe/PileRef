@@ -1,15 +1,11 @@
 using System;
 using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
-using PileRef.Model;
 using PileRef.ViewModel;
+using DocumentBase = PileRef.Model.Document.DocumentBase;
 
-namespace PileRef
+namespace PileRef.View
 {
     public partial class DocumentView : ObjectViewBase<DocumentView>
     {
@@ -40,7 +36,7 @@ namespace PileRef
             
             InitializeComponent();
             
-            this.AddHandler(PointerPressedEvent, ControlPressed, RoutingStrategies.Tunnel);
+            AddHandler(PointerPressedEvent, ControlPressed, RoutingStrategies.Tunnel);
             v_Title.AddHandler(PointerPressedEvent, PressedTitleEdit, RoutingStrategies.Tunnel);
             v_Title.AddHandler(LostFocusEvent, TitleEditLostFocus, RoutingStrategies.Tunnel);
         }

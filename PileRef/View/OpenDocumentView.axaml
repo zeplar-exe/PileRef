@@ -2,7 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:model="clr-namespace:PileRef.Model"
              xmlns:text="clr-namespace:System.Text;assembly=System.Runtime"
-             x:Class="PileRef.OpenDocumentView"
+             xmlns:document="clr-namespace:PileRef.Model.Document"
+             x:Class="PileRef.View.OpenDocumentView"
              Title="Open Document">
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
@@ -12,7 +13,7 @@
         <StackPanel Orientation="Horizontal">
             <Label>This is a</Label>
             <RadioButton IsChecked="{Binding UriIsFile}" GroupName="uriType">File Path</RadioButton>
-            <RadioButton IsChecked="{Binding !UriIsFile}" GroupName="uriType">Website Link</RadioButton>
+            <RadioButton IsChecked="{Binding !UriIsFile}" GroupName="uriType">Webpage Url</RadioButton>
         </StackPanel>
         <Separator></Separator>
         
@@ -21,10 +22,10 @@
                      SelectionMode="AlwaysSelected" SelectedItem="{Binding DocumentType}" 
                      SelectionChanged="DocumentTypeSelected">
                 <ListBox.ItemTemplate>
-                    <DataTemplate DataType="model:DocumentType">
+                    <DataTemplate DataType="document:DocumentType">
                         <StackPanel>
                             <Image></Image>
-                            <TextBlock Text="{Binding Name}"></TextBlock>
+                            <TextBlock Text="{Binding DisplayName}"></TextBlock>
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

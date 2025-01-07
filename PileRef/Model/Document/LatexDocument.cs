@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 public class LatexDocument : TextDocumentBase
 {

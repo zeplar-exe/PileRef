@@ -1,7 +1,6 @@
 ﻿using System.IO;
-using System.Reflection.Metadata;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 public class XmlWordDocument : DocumentBase
 {

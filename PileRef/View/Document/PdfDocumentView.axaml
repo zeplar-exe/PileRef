@@ -5,6 +5,7 @@
              xmlns:pileRef="clr-namespace:PileRef"
              xmlns:viewModel="clr-namespace:PileRef.ViewModel"
              xmlns:model="clr-namespace:PileRef.Model"
+             xmlns:document="clr-namespace:PileRef.Model.Document"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="PileRef.View.Document.PdfDocumentView">
     <UserControl.ContentTemplate>
@@ -19,7 +20,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.Styles>
-                            <Style Selector="ItemsControl > ContentPresenter" x:DataType="model:PdfTextBlock">
+                            <Style Selector="ItemsControl > ContentPresenter" x:DataType="document:PdfTextBlock">
                                 <Setter Property="Canvas.Top" Value="{Binding Path=Rect.Y}" />
                                 <Setter Property="Canvas.Left" Value="{Binding Path=Rect.X}" />
                             </Style>
@@ -42,7 +43,9 @@
             </DataTemplate>
             <DataTemplate x:Key="{x:Type viewModel:ScrollPdfDocumentViewModel}" DataType="viewModel:ScrollPdfDocumentViewModel">
                 <ScrollViewer>
-            
+                    <ItemsControl ItemsSource="{Binding PageImages}">
+                        
+                    </ItemsControl>
                 </ScrollViewer>
             </DataTemplate>
         </pileRef:ObjectTemplateSelector>

@@ -1,9 +1,7 @@
 ﻿using System.IO;
-using System.Reflection.Metadata;
 using System.Text;
-using PileRef.Model;
 
-namespace PileRef;
+namespace PileRef.Model.Document;
 
 public class OldWordDocument : TextDocumentBase
 {

@@ -6,7 +6,8 @@
              xmlns:controls="clr-namespace:AvaloniaMath.Controls;assembly=AvaloniaMath"
              xmlns:svg=":clr-namespace:Avalonia.Skia;assembly=Avalonia.Svg.Svg"
              xmlns:document="clr-namespace:PileRef.View.Document"
-             x:Class="PileRef.DocumentView"
+             xmlns:documents="clr-namespace:PileRef.Model.Document"
+             x:Class="PileRef.View.DocumentView"
              Width="{Binding Document.Width}"
              Height="{Binding Document.Height}">
     <Grid RowDefinitions="Auto, *">
@@ -19,49 +20,49 @@
                         Background="White" BorderThickness="1" BorderBrush="Gray">
             <ContentControl.ContentTemplate>
                 <pileRef:ObjectTemplateSelector>
-                    <DataTemplate x:Key="{x:Type model:MarkdownDocument}" DataType="model:MarkdownDocument">
+                    <DataTemplate x:Key="{x:Type documents:MarkdownDocument}" DataType="documents:MarkdownDocument">
                         <mdxaml:MarkdownScrollViewer Cursor="IBeam" SelectionEnabled="True"
                                                      Markdown="{Binding Content}"/>
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:PlainTextDocument}" DataType="model:PlainTextDocument">
+                    <DataTemplate x:Key="{x:Type documents:PlainTextDocument}" DataType="documents:PlainTextDocument">
                         <SelectableTextBlock Text="{Binding Content}"
                                              TextWrapping="Wrap"/>
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:LatexDocument}" DataType="model:LatexDocument">
+                    <DataTemplate x:Key="{x:Type documents:LatexDocument}" DataType="documents:LatexDocument">
                         <controls:FormulaBlock Formula="{Binding Content}"/>
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:PilePdfDocument}" DataType="model:PilePdfDocument">
+                    <DataTemplate x:Key="{x:Type documents:PilePdfDocument}" DataType="documents:PilePdfDocument">
                         <document:PdfDocumentView Document="{Binding}"/>
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:SvgDocument}" DataType="model:SvgDocument">
+                    <DataTemplate x:Key="{x:Type documents:SvgDocument}" DataType="documents:SvgDocument">
                         <Image>
                             <Image.Source>
                                 <SvgImage Source="{Binding Uri.Path}"></SvgImage>
                             </Image.Source>
                         </Image>
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:EpubDocument}" DataType="model:EpubDocument">
+                    <DataTemplate x:Key="{x:Type documents:EpubDocument}" DataType="documents:EpubDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:RichTextDocument}" DataType="model:RichTextDocument">
+                    <DataTemplate x:Key="{x:Type documents:RichTextDocument}" DataType="documents:RichTextDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:OdtDocument}" DataType="model:OdtDocument">
+                    <DataTemplate x:Key="{x:Type documents:OdtDocument}" DataType="documents:OdtDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:XpsDocument}" DataType="model:XpsDocument">
+                    <DataTemplate x:Key="{x:Type documents:XpsDocument}" DataType="documents:XpsDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type pileRef:PagesDocument}" DataType="pileRef:PagesDocument">
+                    <DataTemplate x:Key="{x:Type documents:PagesDocument}" DataType="documents:PagesDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type pileRef:OldWordDocument}" DataType="pileRef:OldWordDocument">
+                    <DataTemplate x:Key="{x:Type documents:OldWordDocument}" DataType="documents:OldWordDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:XmlWordDocument}" DataType="model:XmlWordDocument">
+                    <DataTemplate x:Key="{x:Type documents:XmlWordDocument}" DataType="documents:XmlWordDocument">
                         
                     </DataTemplate>
-                    <DataTemplate x:Key="{x:Type model:ImageDocument}" DataType="model:ImageDocument">
+                    <DataTemplate x:Key="{x:Type documents:ImageDocument}" DataType="documents:ImageDocument">
                         <Image Source="{Binding Image}" Stretch="UniformToFill" StretchDirection="Both"></Image>
                     </DataTemplate>
                 </pileRef:ObjectTemplateSelector>

@@ -7,6 +7,7 @@ using System.Text;
 using Avalonia.Metadata;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PileRef.Model;
+using PileRef.Model.Document;
 using SystemEncoding = System.Text.Encoding;
 
 namespace PileRef.ViewModel;
@@ -40,16 +41,21 @@ public partial class OpenDocumentViewModel : ObservableObject
         
         if (newValue == null)
             return;
-        
-        var extension = Path.GetExtension(newValue);
-        
-        foreach (var type in DocumentTypes)
+
+        var filename = newValue.Split("?").First().Split("/").Last();
+
+        if (filename.Contains("."))
         {
-            if (type.Extensions.Contains(extension))
+            var extension = filename.Substring(filename.LastIndexOf(".", StringComparison.Ordinal));
+
+            foreach (var type in DocumentTypes)
             {
-                DocumentType = type;
-                
-                break;
+                if (type.Extensions.Contains(extension))
+                {
+                    DocumentType = type;
+
+                    break;
+                }
             }
         }
 
@@ -57,5 +63,14 @@ public partial class OpenDocumentViewModel : ObservableObject
         {
             UriIsFile = false;
         }
+        
+        OnPropertyChanged(nameof(FormCompleted));
+        OnPropertyChanged(nameof(FileExists));
+    }
+
+    partial void OnUriIsFileChanged(bool oldValue, bool newValue)
+    {
+        OnPropertyChanged(nameof(FormCompleted));
+        OnPropertyChanged(nameof(FileExists));
     }
 }

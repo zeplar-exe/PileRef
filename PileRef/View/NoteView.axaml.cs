@@ -1,14 +1,11 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using PileRef.Model;
 using PileRef.ViewModel;
 
-namespace PileRef
+namespace PileRef.View
 {
     public partial class NoteView : ObjectViewBase<NoteView>
     {

@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PdfiumViewer;
 using PileRef.Model;
+using PileRef.Model.Document;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace PileRef.ViewModel;
@@ -35,7 +36,9 @@ public partial class PaginatedPdfDocumentViewModel : ObservableObject
         Document = document;
         Control = control;
         CurrentPageCount = document.Document.PageCount;
+        
         Refresh();
+        document.OnUpdated += (_, _) => Refresh();
     }
 
     public void Refresh()

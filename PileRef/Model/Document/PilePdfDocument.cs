@@ -1,9 +1,7 @@
 ﻿using System.IO;
-using System.Reflection.Metadata;
-using System.Threading.Tasks;
 using PdfiumViewer;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 public class PilePdfDocument : DocumentBase
 {

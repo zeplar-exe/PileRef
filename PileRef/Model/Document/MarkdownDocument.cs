@@ -1,9 +1,7 @@
 ﻿using System.IO;
 using System.Text;
-using Avalonia;
-using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 public partial class MarkdownDocument : TextDocumentBase
 {

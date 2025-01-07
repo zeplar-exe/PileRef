@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 public class XpsDocument : DocumentBase
 {

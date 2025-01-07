@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 [Flags]
 public enum DocumentFlags

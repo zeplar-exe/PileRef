@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -11,7 +13,10 @@ using MsBox.Avalonia.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PileRef.Model;
+using PileRef.Model.Document;
+using PileRef.View;
 using PileRef.ViewModel;
+using Serilog;
 
 namespace PileRef
 {
@@ -29,20 +34,21 @@ namespace PileRef
         
         public MainWindow()
         {
-            ViewModel = new MainWindowViewModel();
+            ViewModel = new MainWindowViewModel(StorageProvider);
             DataContext = ViewModel;
             
             Dpi = (float)(96f * RenderScaling);
             
             InitializeComponent();
             
-            this.AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
-            this.AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel, handledEventsToo: true);
-            this.AddHandler(PointerPressedEvent, OnMouseDown, RoutingStrategies.Tunnel, handledEventsToo: true);
-            this.AddHandler(PointerPressedEvent, OnMouseDownBubble, RoutingStrategies.Bubble, handledEventsToo: true);
-            this.AddHandler(PointerMovedEvent, OnMouseMove, RoutingStrategies.Tunnel, handledEventsToo: true);
-            this.AddHandler(PointerReleasedEvent, OnMouseUp, RoutingStrategies.Tunnel, handledEventsToo: true);
-            this.AddHandler(PointerReleasedEvent, OnMouseUpBubble, RoutingStrategies.Bubble, handledEventsToo: true);
+            AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+            AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel, handledEventsToo: true);
+            AddHandler(PointerPressedEvent, OnMouseDown, RoutingStrategies.Tunnel, handledEventsToo: true);
+            AddHandler(PointerPressedEvent, OnMouseDownBubble, RoutingStrategies.Bubble, handledEventsToo: true);
+            AddHandler(PointerMovedEvent, OnMouseMove, RoutingStrategies.Tunnel, handledEventsToo: true);
+            AddHandler(PointerReleasedEvent, OnMouseUp, RoutingStrategies.Tunnel, handledEventsToo: true);
+            AddHandler(PointerReleasedEvent, OnMouseUpBubble, RoutingStrategies.Bubble, handledEventsToo: true);
+            AddHandler(DragDrop.DropEvent, OnDrop);
         }
 
         private void OnCreateNoteReleased(object? sender, PointerReleasedEventArgs e)
@@ -59,37 +65,6 @@ namespace PileRef
             var pos = v_PileView.PointToClient(menu.PointToScreen(new Point(0, 0)));
 
             ViewModel.OpenDocument(pos, this);
-        }
-        
-        private void OnSaveReleased(object? sender, PointerReleasedEventArgs e)
-        {
-            ViewModel.SavePile(StorageProvider);
-        }
-
-        private async void OnCreatePileReleased(object? sender, PointerReleasedEventArgs e)
-        {
-            if (ViewModel.ChangesMade)
-            {
-                var result = await MessageBoxManager.GetMessageBoxStandard(
-                    "Create New Pile", "The current pile has unsaved changes. Would you like to save?",
-                    ButtonEnum.YesNoCancel).ShowAsync();
-
-                if (result == ButtonResult.Yes)
-                {
-                    ViewModel.SavePile(StorageProvider);
-                }
-                else if (result != ButtonResult.No)
-                {
-                    return;
-                }
-            }
-            
-            ViewModel.CreatePile();
-        }
-
-        private async void OnOpenPileReleased(object? sender, PointerReleasedEventArgs e)
-        {
-            ViewModel.OpenPile(StorageProvider);
         }
 
         private void OnNoteSelectedDown(object? sender, RoutedEventArgs e)
@@ -200,6 +175,10 @@ namespace PileRef
             {
                 ViewModel.IsPanning = true;
             }
+            else
+            {
+                e.Handled = false;
+            }
         }
 
         private void OnKeyUp(object? sender, KeyEventArgs e)
@@ -213,6 +192,62 @@ namespace PileRef
         private void OnWheel(object? sender, PointerWheelEventArgs e)
         {
             ViewModel.ZoomLevel += e.Delta.Y;
+        }
+
+        private async void OnDrop(object? sender, DragEventArgs e)
+        {
+            ViewModel.Pile ??= new Pile();
+            
+            var pos = e.GetPosition(v_PileView);
+            
+            string uri;
+            bool isFile;
+            
+            if (e.Data.Contains("UniformResourceLocator"))
+            {
+                var uriBytes = (byte[])e.Data.Get("UniformResourceLocator")!;
+                uri = Encoding.ASCII.GetString(uriBytes).TrimEnd('\0');
+                isFile = false;
+            }
+            else if (e.Data.Contains("FileName"))
+            {
+                var nameBytes = (byte[])e.Data.Get("FileName")!;
+                uri = Encoding.ASCII.GetString(nameBytes).TrimEnd('\0');
+                isFile = true;
+            }
+            else if (e.Data.Contains("Text"))
+            {
+                var text = e.Data.Get(DataFormats.Text) as string ?? string.Empty;
+                var note = new Note { Text = text, XPosition = pos.X, YPosition = pos.Y };
+                
+                ViewModel.Pile.Notes.Add(note);
+                
+                return;
+            }
+            else
+            {
+                await MessageBoxManager
+                    .GetMessageBoxStandard("Drag & Drop Import", "Unknown entity.")
+                    .ShowAsync();
+                
+                Log.Logger.Debug($"Unknown drag and drop entity: {string.Join(", ", e.Data.GetDataFormats())}");
+                
+                return;
+            }
+            
+            var dialog = new OpenDocumentView();
+            dialog.ViewModel.Uri = uri;
+            dialog.ViewModel.UriIsFile = isFile;
+
+            var document = await dialog.ShowDialog<DocumentBase?>(this);
+            
+            if (document == null)
+                return;
+            
+            document.XPosition = pos.X;
+            document.YPosition = pos.Y;
+            
+            ViewModel.Pile.Documents.Add(document);
         }
     }
 }

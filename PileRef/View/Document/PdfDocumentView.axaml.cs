@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using PileRef.Model;
+using PileRef.Model.Document;
 using PileRef.ViewModel;
 
 namespace PileRef.View.Document;

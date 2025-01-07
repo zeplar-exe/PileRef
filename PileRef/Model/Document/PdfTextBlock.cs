@@ -1,8 +1,6 @@
 ﻿using Avalonia;
-using CommunityToolkit.Mvvm.ComponentModel;
-using PdfiumViewer;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 public class PdfTextBlock
 {

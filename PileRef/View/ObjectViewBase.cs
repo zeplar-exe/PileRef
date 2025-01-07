@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
-namespace PileRef;
+namespace PileRef.View;
 
 public abstract class ObjectViewBase<T> : UserControl
 {
@@ -27,8 +27,8 @@ public abstract class ObjectViewBase<T> : UserControl
 
     public ObjectViewBase()
     {
-        this.AddHandler(PointerPressedEvent, ControlPressed, RoutingStrategies.Tunnel);
-        this.AddHandler(PointerReleasedEvent, ControlReleased, RoutingStrategies.Tunnel);
+        AddHandler(PointerPressedEvent, ControlPressed, RoutingStrategies.Tunnel);
+        AddHandler(PointerReleasedEvent, ControlReleased, RoutingStrategies.Tunnel);
     }
     
     protected void ControlPressed(object? sender, PointerPressedEventArgs e)

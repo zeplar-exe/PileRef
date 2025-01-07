@@ -1,14 +1,20 @@
 ﻿using System.IO;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
+[JsonObject(MemberSerialization.OptIn)]
 public abstract partial class TextDocumentBase : DocumentBase
 {
-    [ObservableProperty] private string content;
-    [ObservableProperty] private Encoding encoding;
-    
+    [ObservableProperty] [JsonProperty("content")]
+    public partial string Content { get; set; }
+
+    [ObservableProperty] [JsonProperty("encoding")]
+    public partial Encoding Encoding { get; set; }
+
     protected TextDocumentBase(Stream stream, DocumentUri uri, Encoding encoding) : base(uri, stream)
     {
         Encoding = encoding;

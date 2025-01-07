@@ -2,17 +2,26 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PileRef.Model;
+using PileRef.Model.Document;
+using PileRef.Model.UndoRedo;
+using PileRef.View;
+using DocumentBase = PileRef.Model.Document.DocumentBase;
 
 namespace PileRef.ViewModel;
 
@@ -30,9 +39,17 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private double panY;
     [ObservableProperty] private double zoomLevel = 0; 
     
-    public RelativePoint RenderOrigin = new(0.5, 0.5, RelativeUnit.Relative);
+    private ActionManager ActionManager { get; }
+    
+    private IStorageProvider StorageProvider { get; }
     public double ZoomScale => Math.Pow(1.2, ZoomLevel);
     public double DragScale => Math.Pow(1.2, -ZoomLevel);
+
+    public MainWindowViewModel(IStorageProvider storageProvider)
+    {
+        StorageProvider = storageProvider;
+        ActionManager = new ActionManager();
+    }
     
     partial void OnPileChanged(Pile? value)
     {
@@ -49,12 +66,28 @@ public partial class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(ZoomScale));
         OnPropertyChanged(nameof(DragScale));
     }
+
+    [RelayCommand]
+    public async Task SavePile()
+    {
+        if (ChangesMade || PileFilePath == null)
+            await SavePileAs();
+        else
+        {
+            var json = Pile!.ToJson();
+            
+            await using var text = new StreamWriter(PileFilePath);
+            await using var writer = new JsonTextWriter(text);
+            await json.WriteToAsync(writer);
+        }
+    }
     
-    public async void SavePile(IStorageProvider storageProvider)
+    [RelayCommand]
+    public async Task SavePileAs()
     {
         Pile ??= new Pile();
 
-        var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             FileTypeChoices =
             [
@@ -81,15 +114,14 @@ public partial class MainWindowViewModel : ObservableObject
     {
         var note = new Note
         {
-            Title = "Untitled Note",
             XPosition = position.X,
-            YPosition = position.Y,
-            Width = 280,
-            Height = 300,
+            YPosition = position.Y
         };
 
         Pile ??= new Pile();
         Pile.Notes.Add(note);
+
+        ActionManager.AddAction(new CreatePileObjectAction(Pile, note));
     }
     
     public async void OpenDocument(Point position, Window dialogOwner)
@@ -102,24 +134,42 @@ public partial class MainWindowViewModel : ObservableObject
 
         document.XPosition = position.X;
         document.YPosition = position.Y;
-        document.Width = 280;
-        document.Height = 300;
 
         Pile ??= new Pile();
         Pile.Documents.Add(document);
+        
+        ActionManager.AddAction(new CreatePileObjectAction(Pile, document));
     }
 
-    public void CreatePile()
+    [RelayCommand]
+    public async Task CreatePile()
     {
+        if (ChangesMade)
+        {
+            var result = await MessageBoxManager.GetMessageBoxStandard(
+                "Create New Pile", "The current pile has unsaved changes. Would you like to save?",
+                ButtonEnum.YesNoCancel).ShowAsync();
+
+            if (result == ButtonResult.Yes)
+            {
+                await SavePile();
+            }
+            else if (result != ButtonResult.No)
+            {
+                return;
+            }
+        }
+        
         Pile = new Pile();
         PileFilePath = null;
     }
 
-    public async void OpenPile(IStorageProvider storageProvider)
+    [RelayCommand]
+    public async Task OpenPile()
     {
-        var files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            FileTypeFilter = [new FilePickerFileType("Pile Ref Save File") { Patterns = ["*.pile"] }],
+            FileTypeFilter = [new FilePickerFileType("PileRef Save File") { Patterns = ["*.pile"] }],
             AllowMultiple = false,
         });
 
@@ -133,12 +183,29 @@ public partial class MainWindowViewModel : ObservableObject
         await using var reader = new JsonTextReader(text);
             
         var json = await JToken.ReadFromAsync(reader);
+
+        if (json is not JObject jObject)
+        {
+            await MessageBoxManager.GetMessageBoxStandard(
+                "Invalid Pile", "The selected pile is not correctly formatted and could not be opened.")
+                .ShowAsync();
             
+            return;
+        }
+        
         if (PileFilePath != null)
             RecentPiles.Add(PileFilePath);
-            
-        Pile = json.ToObject<Pile>();
+        
+        Pile = await Pile.FromJsonAsync(jObject);
         PileFilePath = Uri.UnescapeDataString(storageFile.Path.AbsolutePath);
         ChangesMade = false;
     }
+
+    [RelayCommand(CanExecute = nameof(CanUndo))]
+    public void Undo() => ActionManager.Undo();
+    public bool CanUndo() => ActionManager.CanUndo;
+
+    [RelayCommand(CanExecute = nameof(CanRedo))]
+    public void Redo() => ActionManager.Redo();
+    public bool CanRedo() => ActionManager.CanRedo;
 }

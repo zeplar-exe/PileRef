@@ -1,9 +1,7 @@
-﻿using System;
-using Avalonia.Input;
+﻿using Avalonia.Input;
 using Avalonia.Interactivity;
-using PileRef.Model;
 
-namespace PileRef;
+namespace PileRef.View;
 
 public class PileObjectSelectedEventArgs : RoutedEventArgs
 {

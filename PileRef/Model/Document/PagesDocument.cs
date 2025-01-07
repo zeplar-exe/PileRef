@@ -1,7 +1,6 @@
 ﻿using System.IO;
-using PileRef.Model;
 
-namespace PileRef;
+namespace PileRef.Model.Document;
 
 public class PagesDocument : DocumentBase
 {

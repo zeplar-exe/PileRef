@@ -1,19 +1,20 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
-public class ImageDocument : DocumentBase
+public sealed class ImageDocument : DocumentBase
 {
     public IImage Image { get; private set; }
 
     public ImageDocument(Stream stream, DocumentUri uri) : base(uri, stream)
     {
-        Image = new Bitmap(stream);
+        Update();
     }
 
+    [MemberNotNull(nameof(Image))]
     public override void Update()
     {
         Image = new Bitmap(Stream);

@@ -1,8 +1,7 @@
 ﻿using System.IO;
 using System.Text;
-using AvaloniaEdit.Document;
 
-namespace PileRef.Model;
+namespace PileRef.Model.Document;
 
 public class SvgDocument : TextDocumentBase
 {
