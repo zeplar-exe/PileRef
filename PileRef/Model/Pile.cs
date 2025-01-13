@@ -14,27 +14,12 @@ using Serilog;
 
 namespace PileRef.Model;
 
-public partial class Pile : ObservableObject
+public partial class Pile
 {
     public const int FormatVersion = 0;
     
-    public ObservableCollection<DocumentBase> Documents { get; private init; } = [];
-    public ObservableCollection<Note> Notes { get; private init; } = [];
-    
-    public IEnumerable<IPileObject> AllObjects => Documents.Concat<IPileObject>(Notes);
-
-    public Pile()
-    {
-        Documents.CollectionChanged += (sender, args) =>
-        {
-            OnPropertyChanged(nameof(AllObjects));
-        };
-
-        Notes.CollectionChanged += (sender, args) =>
-        {
-            OnPropertyChanged(nameof(AllObjects));
-        };
-    }
+    public List<DocumentBase> Documents { get; private init; } = [];
+    public List<Note> Notes { get; private init; } = [];
 
     public JObject ToJson()
     {
@@ -72,11 +57,11 @@ public partial class Pile : ObservableObject
 
     public static async Task<Pile> FromJsonAsync(JObject json)
     {
-        var notes = json["notes"]?.ToObject<Note[]>() ?? [];
-        var documents = json["documents"];
+        var notes = json[nameof(Notes)]?.ToObject<Note[]>() ?? [];
+        var documents = json[nameof(Documents)];
 
         if (documents?.Type != JTokenType.Array)
-            return new Pile { Notes = new ObservableCollection<Note>(notes) };
+            return new Pile { Notes = new List<Note>(notes) };
 
         var deserializedDocuments = new List<DocumentBase>();
 
@@ -91,7 +76,7 @@ public partial class Pile : ObservableObject
 
             if (typeEnum == null)
             {
-                Log.Logger.Debug($"Discarding document of ty[e {type} from load. Not supported.");
+                Log.Logger.Debug($"Discarding document of type {type} from load. Not supported.");
                 
                 continue;
             }
@@ -100,7 +85,7 @@ public partial class Pile : ObservableObject
 
             if (uri == null)
             {
-                Log.Logger.Debug($"Discarding document of ty[e {type} from load. Invalid uri.");
+                Log.Logger.Debug($"Discarding document of type {type} from load. Invalid uri.");
                 
                 continue;
             }
@@ -109,7 +94,7 @@ public partial class Pile : ObservableObject
 
             if (stream == null)
             {
-                Log.Logger.Debug($"Discarding document of ty[e {type} from load. Failed to open stream.");
+                Log.Logger.Debug($"Discarding document of type {type} from load. Failed to open stream.");
                 
                 continue;
             }
@@ -120,7 +105,7 @@ public partial class Pile : ObservableObject
 
             if (doc == null)
             {
-                Log.Logger.Debug($"Discarding document of ty[e {type} from load. Not supported.");
+                Log.Logger.Debug($"Discarding document of type {type} from load. Not supported.");
                 
                 continue;
             }
@@ -134,8 +119,8 @@ public partial class Pile : ObservableObject
         }
         
         return new Pile { 
-            Notes = new ObservableCollection<Note>(notes), 
-            Documents = new ObservableCollection<DocumentBase>(deserializedDocuments) 
+            Notes = new List<Note>(notes), 
+            Documents = new List<DocumentBase>(deserializedDocuments) 
         };
     }
 }

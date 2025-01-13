@@ -40,7 +40,7 @@ public partial class AppSettings : ObservableObject
         var targetLocale = Locales.SingleOrDefault(l => l?.DisplayName == "English", Locales.FirstOrDefault());
         
         if (targetLocale == null)
-            Log.Warning($"Locale not found.");
+            Log.Warning($"No locales available on startup.");
         
         targetLocale ??= new LocaleInfo("null", "null");
         

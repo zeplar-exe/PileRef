@@ -50,7 +50,7 @@ public partial class OpenDocumentViewModel : ObservableObject
 
             foreach (var type in DocumentTypes)
             {
-                if (type.Extensions.Contains(extension))
+                if (type.MatchExtension(extension))
                 {
                     DocumentType = type;
 

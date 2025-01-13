@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace PileRef.Model.Document;
 
@@ -13,7 +14,12 @@ public class DocumentType
     {
         Id = id;
         DisplayName = displayName;
-        Extensions = new HashSet<string>(extensions);
+        Extensions = new HashSet<string>(extensions.Select(e => e.ToLowerInvariant()));
         Flags = flags;
+    }
+
+    public bool MatchExtension(string extension)
+    {
+        return Extensions.Contains(extension.ToLowerInvariant());
     }
 }

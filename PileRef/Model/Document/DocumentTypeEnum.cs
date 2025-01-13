@@ -37,8 +37,8 @@ public static class DocumentTypeEnum
 
     public static DocumentType? GetEnumFromType(Type type) 
     {
-        if (!type.IsAssignableFrom(typeof(DocumentType)))
-            throw new ArgumentException($"Type '{type.FullName}' is not assignable from '{typeof(DocumentType).FullName}'");
+        if (!type.IsAssignableTo(typeof(DocumentBase)))
+            throw new ArgumentException($"Type '{type.FullName}' is not assignable to '{typeof(DocumentBase).FullName}'");
 
         if (type == typeof(MarkdownDocument))
             return Markdown;

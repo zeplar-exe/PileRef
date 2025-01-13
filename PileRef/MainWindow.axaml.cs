@@ -34,6 +34,10 @@ namespace PileRef
         
         public MainWindow()
         {
+            #if DEBUG
+            this.AttachDevTools();
+            #endif
+            
             ViewModel = new MainWindowViewModel(StorageProvider);
             DataContext = ViewModel;
             
@@ -196,8 +200,6 @@ namespace PileRef
 
         private async void OnDrop(object? sender, DragEventArgs e)
         {
-            ViewModel.Pile ??= new Pile();
-            
             var pos = e.GetPosition(v_PileView);
             
             string uri;
@@ -220,7 +222,7 @@ namespace PileRef
                 var text = e.Data.Get(DataFormats.Text) as string ?? string.Empty;
                 var note = new Note { Text = text, XPosition = pos.X, YPosition = pos.Y };
                 
-                ViewModel.Pile.Notes.Add(note);
+                ViewModel.AddPileObject(note);
                 
                 return;
             }
@@ -247,7 +249,7 @@ namespace PileRef
             document.XPosition = pos.X;
             document.YPosition = pos.Y;
             
-            ViewModel.Pile.Documents.Add(document);
+            ViewModel.AddPileObject(document);
         }
     }
 }

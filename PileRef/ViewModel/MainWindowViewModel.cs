@@ -21,13 +21,15 @@ using PileRef.Model;
 using PileRef.Model.Document;
 using PileRef.Model.UndoRedo;
 using PileRef.View;
+using Serilog;
 using DocumentBase = PileRef.Model.Document.DocumentBase;
 
 namespace PileRef.ViewModel;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    [ObservableProperty] private Pile? pile;
+    [ObservableProperty] private partial Pile? Pile { get; set; }
+    
     [ObservableProperty] private string? pileFilePath;
     public ObservableCollection<string> RecentPiles { get; } = [];
     [ObservableProperty] private bool changesMade;
@@ -37,23 +39,33 @@ public partial class MainWindowViewModel : ObservableObject
 
     [ObservableProperty] private double panX;
     [ObservableProperty] private double panY;
-    [ObservableProperty] private double zoomLevel = 0; 
-    
-    private ActionManager ActionManager { get; }
+    [ObservableProperty] private double zoomLevel = 0;
+
+    private ActionManager ActionManager { get; } = new();
     
     private IStorageProvider StorageProvider { get; }
     public double ZoomScale => Math.Pow(1.2, ZoomLevel);
     public double DragScale => Math.Pow(1.2, -ZoomLevel);
+    
+    public ObservableCollection<IPileObject> PileObjects { get; } = [];
 
     public MainWindowViewModel(IStorageProvider storageProvider)
     {
         StorageProvider = storageProvider;
-        ActionManager = new ActionManager();
     }
     
     partial void OnPileChanged(Pile? value)
     {
         ChangesMade = true;
+        PileObjects.Clear();
+        
+        if (value == null)
+            return;
+        
+        foreach (var note in value.Notes)
+            PileObjects.Add(note);
+        foreach (var document in value.Documents)
+            PileObjects.Add(document);
     }
 
     partial void OnIsPanningChanged(bool oldValue, bool newValue)
@@ -70,9 +82,11 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     public async Task SavePile()
     {
-        if (ChangesMade || PileFilePath == null)
+        if (PileFilePath == null)
+        {
             await SavePileAs();
-        else
+        }
+        else if (ChangesMade)
         {
             var json = Pile!.ToJson();
             
@@ -118,8 +132,7 @@ public partial class MainWindowViewModel : ObservableObject
             YPosition = position.Y
         };
 
-        Pile ??= new Pile();
-        Pile.Notes.Add(note);
+        AddPileObject(note);
 
         ActionManager.AddAction(new CreatePileObjectAction(Pile, note));
     }
@@ -135,8 +148,7 @@ public partial class MainWindowViewModel : ObservableObject
         document.XPosition = position.X;
         document.YPosition = position.Y;
 
-        Pile ??= new Pile();
-        Pile.Documents.Add(document);
+        AddPileObject(document);
         
         ActionManager.AddAction(new CreatePileObjectAction(Pile, document));
     }
@@ -178,21 +190,38 @@ public partial class MainWindowViewModel : ObservableObject
 
         var storageFile = files[0];
 
-        await using var stream = await storageFile.OpenWriteAsync();
+        await using var stream = await storageFile.OpenReadAsync();
         using var text = new StreamReader(stream);
         await using var reader = new JsonTextReader(text);
-            
-        var json = await JToken.ReadFromAsync(reader);
 
-        if (json is not JObject jObject)
+        JObject jObject;
+
+        try
+        {
+            var json = await JToken.ReadFromAsync(reader);
+
+            if (json is not JObject jo)
+            {
+                await MessageBoxManager.GetMessageBoxStandard(
+                        "Invalid Pile", "The selected pile is not correctly formatted and could not be opened.")
+                    .ShowAsync();
+                Log.Error($"Expected save JSON to take form of JSON object, got {json.Type}");
+
+                return;
+            }
+
+            jObject = jo;
+        }
+        catch (JsonReaderException e)
         {
             await MessageBoxManager.GetMessageBoxStandard(
-                "Invalid Pile", "The selected pile is not correctly formatted and could not be opened.")
+                    "Invalid Pile", "Failed to read pile JSON.")
                 .ShowAsync();
+            Log.Error($"({storageFile.Path})" +  e.Message);
             
             return;
         }
-        
+
         if (PileFilePath != null)
             RecentPiles.Add(PileFilePath);
         
@@ -208,4 +237,43 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanRedo))]
     public void Redo() => ActionManager.Redo();
     public bool CanRedo() => ActionManager.CanRedo;
+
+    [MemberNotNull(nameof(Pile))]
+    public void AddPileObject(IPileObject pileObject)
+    {
+        Pile ??= new Pile();
+        
+        PileObjects.Add(pileObject);
+        
+        if (pileObject is Note note)
+        {
+            Pile.Notes.Add(note);
+        }
+        else if (pileObject is DocumentBase document)
+        {
+            Pile.Documents.Add(document);
+        }
+        
+        ChangesMade = true;
+    }
+
+    [MemberNotNull(nameof(Pile))]
+    public void RemovePileObject(IPileObject pileObject)
+    {
+        Pile ??= new Pile();
+        
+        if (PileObjects.Remove(pileObject))
+        {
+            if (pileObject is Note note)
+            {
+                Pile.Notes.Add(note);
+            }
+            else if (pileObject is DocumentBase document)
+            {
+                Pile.Documents.Add(document);
+            }
+        }
+        
+        ChangesMade = true;
+    }
 }

@@ -20,7 +20,7 @@
                 <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}"></KeyBinding>
         </Window.KeyBindings>
         <ItemsControl x:Name="v_PileView" 
-                      Background="DimGray" ItemsSource="{Binding Pile.AllObjects}" 
+                      Background="DimGray" ItemsSource="{Binding PileObjects}" 
                       Width="100000000000000" Height="100000000000000"
                       RenderTransformOrigin="{Binding RenderOrigin}">
                 <ItemsControl.RenderTransform>
@@ -35,8 +35,6 @@
                                 <MenuItem PointerReleased="OnOpenDocumentReleased" Header="Open Document"></MenuItem>
                                 <Separator></Separator>
                                 <MenuItem Command="{Binding CreatePileCommand}" Header="New Pile" HotKey="Ctrl+N"></MenuItem>
-                                <MenuItem Command="{Binding SavePileCommand}" Header="Save Pile" HotKey="Ctrl+S"></MenuItem>
-                                <MenuItem Command="{Binding SavePileAsCommand}" Header="Save Pile As..." HotKey="Ctrl+Shift+S"></MenuItem>
                                 <MenuItem Command="{Binding OpenPileCommand}" Header="Open Pile..." HotKey="Ctrl+O"></MenuItem>
                                 <MenuItem Header="Open Recent Pile" ItemsSource="{Binding RecentPiles}">
                                         <MenuItem.ItemTemplate>
@@ -45,6 +43,9 @@
                                                 </DataTemplate>
                                         </MenuItem.ItemTemplate>
                                 </MenuItem>
+                                <Separator></Separator>
+                                <MenuItem Command="{Binding SavePileCommand}" Header="Save Pile" HotKey="Ctrl+S"></MenuItem>
+                                <MenuItem Command="{Binding SavePileAsCommand}" Header="Save Pile As..." HotKey="Ctrl+Shift+S"></MenuItem>
                         </ContextMenu>
                 </ItemsControl.ContextMenu>
                 
