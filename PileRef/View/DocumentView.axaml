@@ -63,7 +63,7 @@
                         
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type documents:ImageDocument}" DataType="documents:ImageDocument">
-                        <Image Source="{Binding Image}" Stretch="UniformToFill" StretchDirection="Both"></Image>
+                        <Image Source="{Binding Image}"></Image>
                     </DataTemplate>
                 </pileRef:ObjectTemplateSelector>
             </ContentControl.ContentTemplate>

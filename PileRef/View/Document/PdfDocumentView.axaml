@@ -12,7 +12,7 @@
         <pileRef:ObjectTemplateSelector>
             <DataTemplate x:Key="{x:Type viewModel:PaginatedPdfDocumentViewModel}" DataType="viewModel:PaginatedPdfDocumentViewModel">
                 <Grid RowDefinitions="*, Auto">
-                    <Image Grid.Row="0" StretchDirection="Both" Stretch="UniformToFill" Source="{Binding CurrentPageImage}"></Image>
+                    <Image Grid.Row="0" Source="{Binding CurrentPageImage}"></Image>
                     <ItemsControl Grid.Row="0" ItemsSource="{Binding TextBlocks}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>

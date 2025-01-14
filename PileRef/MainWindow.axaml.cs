@@ -22,7 +22,8 @@ namespace PileRef
 {
     public partial class MainWindow : Window
     {
-        private List<IPileObject> SelectedObjects { get; } = [];
+        private HashSet<IPileObject> SelectedObjects { get; } = [];
+        private ObjectViewBase? CurrentInteract { get; set; }
         private bool IsMouseDown { get; set; }
         private bool IsDragMouseDown { get; set; }
         private bool WasDragging { get; set; }
@@ -45,7 +46,6 @@ namespace PileRef
             
             InitializeComponent();
             
-            AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel, handledEventsToo: true);
             AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel, handledEventsToo: true);
             AddHandler(PointerPressedEvent, OnMouseDown, RoutingStrategies.Tunnel, handledEventsToo: true);
             AddHandler(PointerPressedEvent, OnMouseDownBubble, RoutingStrategies.Bubble, handledEventsToo: true);
@@ -71,36 +71,26 @@ namespace PileRef
             ViewModel.OpenDocument(pos, this);
         }
 
-        private void OnNoteSelectedDown(object? sender, RoutedEventArgs e)
+        private void OnSelect(object? sender, RoutedEventArgs e)
         {
-            if (sender is not NoteView view)
-                return;
+            var viewBase = (ObjectViewBase)sender!;
+            var args = (PileObjectSelectEventArgs)e;
             
-            HandlePileObjectSelect(view.Note, (PileObjectSelectedEventArgs)e, false);
+            HandlePileObjectSelect(viewBase.PileObject, args);
         }
         
-        private void OnNoteSelectedUp(object? sender, RoutedEventArgs e)
+        private void OnInteract(object? sender, RoutedEventArgs e)
         {
-            if (sender is not NoteView view)
-                return;
+            var viewBase = (ObjectViewBase)sender!;
 
-            HandlePileObjectSelect(view.Note, (PileObjectSelectedEventArgs)e, true);
-        }
-        
-        private void OnDocumentSelected(object? sender, RoutedEventArgs e)
-        {
-            if (sender is not DocumentView view)
-                return;
-
-            var args = (PileObjectSelectedEventArgs)e;
+            CurrentInteract?.EndInteract();
+            CurrentInteract = viewBase;
             
-            HandlePileObjectSelect(view.Document, args, false);
+            viewBase.BeginInteract();
         }
 
-        private void HandlePileObjectSelect(IPileObject pileObject, PileObjectSelectedEventArgs args, bool isReleasing)
+        private void HandlePileObjectSelect(IPileObject pileObject, PileObjectSelectEventArgs args)
         {
-            IsDragMouseDown = !isReleasing;
-            
             var pointerArgs = args.PointerArgs;
             
             if (SelectedObjects.Contains(pileObject))
@@ -123,12 +113,18 @@ namespace PileRef
         {
             IsMouseDown = true;
             WasDragging = false;
+            CurrentInteract?.EndInteract();
+            CurrentInteract = null;
+            SelectedObjects.Clear();
+
+            var pointerProps = e.GetCurrentPoint(this).Properties;
+            ViewModel.IsPanning = pointerProps.IsLeftButtonPressed && e.KeyModifiers.HasFlag(KeyModifiers.Alt) ||
+                                  pointerProps.IsMiddleButtonPressed;
         }
         
         private void OnMouseDownBubble(object? sender, PointerPressedEventArgs e)
         {
-            ViewModel.IsPanning = true;
-            SelectedObjects.Clear();
+            
         }
         
         private void OnMouseMove(object? sender, PointerEventArgs e)
@@ -166,23 +162,12 @@ namespace PileRef
         private void OnMouseUp(object? sender, PointerReleasedEventArgs e)
         {
             IsMouseDown = false;
+            ViewModel.IsPanning = false;
         }
         
         private void OnMouseUpBubble(object? sender, PointerReleasedEventArgs e)
         {
-            ViewModel.IsPanning = false;
-        }
-
-        private void OnKeyDown(object? sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Space)
-            {
-                ViewModel.IsPanning = true;
-            }
-            else
-            {
-                e.Handled = false;
-            }
+            
         }
 
         private void OnKeyUp(object? sender, KeyEventArgs e)

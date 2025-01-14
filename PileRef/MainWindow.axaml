@@ -68,15 +68,16 @@
                                         <view:NoteView 
                                                 Note="{Binding $parent.DataContext}"
                                                 IsEnabled="{Binding !IsPanning, RelativeSource={RelativeSource AncestorType=pileRef:MainWindow}}"
-                                                SelectedDown="OnNoteSelectedDown"
-                                                SelectedUp="OnNoteSelectedUp">
+                                                RequestSelect="OnSelect"
+                                                RequestInteract="OnInteract">
                                         </view:NoteView>
                                 </DataTemplate>
                                 <DataTemplate x:Key="{x:Type document:DocumentBase}" DataType="document:DocumentBase">
                                         <view:DocumentView 
                                                 IsEnabled="{Binding !IsPanning}"
                                                 Document="{Binding $parent.DataContext}"
-                                                Selected="OnDocumentSelected">
+                                                RequestSelect="OnSelect"
+                                                RequestInteract="OnInteract">
                                         </view:DocumentView>
                                 </DataTemplate>
                         </pileRef:ObjectTemplateSelector>

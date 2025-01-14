@@ -2,46 +2,54 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+using CommunityToolkit.Mvvm.ComponentModel;
+using PileRef.Model;
 
 namespace PileRef.View;
 
-public abstract class ObjectViewBase<T> : UserControl
+public abstract partial class ObjectViewBase : UserControl
 {
-    public static readonly RoutedEvent<PointerPressedEventArgs> SelectedDownEvent =
-        RoutedEvent.Register<T, PointerPressedEventArgs>(nameof(SelectedDown), RoutingStrategies.Direct);
-
-    public event EventHandler<RoutedEventArgs> SelectedDown
+    public abstract IPileObject PileObject { get; }
+    
+    public static readonly RoutedEvent<PointerPressedEventArgs> RequestSelectEvent =
+        RoutedEvent.Register<ObjectViewBase, PointerPressedEventArgs>(nameof(RequestSelect), RoutingStrategies.Direct);
+    
+    public event EventHandler<RoutedEventArgs> RequestSelect
     {
-        add => AddHandler(SelectedDownEvent, value);
-        remove => RemoveHandler(SelectedDownEvent, value);
+        add => AddHandler(RequestSelectEvent, value);
+        remove => RemoveHandler(RequestSelectEvent, value);
     }
-        
-    public static readonly RoutedEvent<PointerPressedEventArgs> SelectedUpEvent =
-        RoutedEvent.Register<T, PointerPressedEventArgs>(nameof(SelectedUp), RoutingStrategies.Direct);
-
-    public event EventHandler<RoutedEventArgs> SelectedUp
+    
+    public static readonly RoutedEvent<PointerPressedEventArgs> RequestInteractEvent =
+        RoutedEvent.Register<ObjectViewBase, PointerPressedEventArgs>(nameof(RequestInteract), RoutingStrategies.Direct);
+    
+    public event EventHandler<RoutedEventArgs> RequestInteract
     {
-        add => AddHandler(SelectedUpEvent, value);
-        remove => RemoveHandler(SelectedUpEvent, value);
+        add => AddHandler(RequestInteractEvent, value);
+        remove => RemoveHandler(RequestInteractEvent, value);
     }
 
     public ObjectViewBase()
     {
         AddHandler(PointerPressedEvent, ControlPressed, RoutingStrategies.Tunnel);
-        AddHandler(PointerReleasedEvent, ControlReleased, RoutingStrategies.Tunnel);
     }
+
+    public abstract void BeginInteract();
+    public abstract void EndInteract();
     
     protected void ControlPressed(object? sender, PointerPressedEventArgs e)
     {
-        var args = new PileObjectSelectedEventArgs(SelectedDownEvent, e);
-            
-        RaiseEvent(args);
-    }
-        
-    protected void ControlReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        var args = new PileObjectSelectedEventArgs(SelectedDownEvent, e);
-            
-        RaiseEvent(args);
+        var selectArgs = new PileObjectSelectEventArgs(RequestSelectEvent, e);
+        var interactArgs = new PileObjectSelectEventArgs(RequestInteractEvent, e);
+
+        if (e.ClickCount < 2)
+        {
+            RaiseEvent(selectArgs);
+        }
+        else
+        {
+            RaiseEvent(interactArgs);
+        }
     }
 }

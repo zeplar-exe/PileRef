@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="PileRef/App.axaml" value="PileRef/PileRef.csproj" />
+        <entry key="PileRef/MainWindow.axaml" value="PileRef/PileRef.csproj" />
+        <entry key="PileRef/View/Document/PdfDocumentView.axaml" value="PileRef/PileRef.csproj" />
+        <entry key="PileRef/View/DocumentView.axaml" value="PileRef/PileRef.csproj" />
+        <entry key="PileRef/View/NoteView.axaml" value="PileRef/PileRef.csproj" />
+        <entry key="PileRef/View/OpenDocumentView.axaml" value="PileRef/PileRef.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

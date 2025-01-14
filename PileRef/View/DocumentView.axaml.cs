@@ -2,12 +2,14 @@ using System;
 using Avalonia;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.VisualTree;
+using PileRef.Model;
 using PileRef.ViewModel;
 using DocumentBase = PileRef.Model.Document.DocumentBase;
 
 namespace PileRef.View
 {
-    public partial class DocumentView : ObjectViewBase<DocumentView>
+    public partial class DocumentView : ObjectViewBase
     {
         public DocumentViewModel ViewModel { get; }
         
@@ -20,14 +22,7 @@ namespace PileRef.View
         public static readonly StyledProperty<DocumentBase> DocumentProperty =
             AvaloniaProperty.Register<DocumentView, DocumentBase>(nameof(Document));
         
-        public static readonly RoutedEvent<PointerPressedEventArgs> SelectedEvent =
-            RoutedEvent.Register<DocumentView, PointerPressedEventArgs>(nameof(Selected), RoutingStrategies.Direct);
-
-        public event EventHandler<RoutedEventArgs> Selected
-        {
-            add => AddHandler(SelectedEvent, value);
-            remove => RemoveHandler(SelectedEvent, value);
-        }
+        public override IPileObject PileObject => Document;
         
         public DocumentView()
         {
@@ -40,12 +35,15 @@ namespace PileRef.View
             v_Title.AddHandler(PointerPressedEvent, PressedTitleEdit, RoutingStrategies.Tunnel);
             v_Title.AddHandler(LostFocusEvent, TitleEditLostFocus, RoutingStrategies.Tunnel);
         }
-        
-        private void ControlPressed(object? sender, PointerPressedEventArgs e)
+
+        public override void BeginInteract()
         {
-            var args = new PileObjectSelectedEventArgs(SelectedEvent, e);
             
-            RaiseEvent(args);
+        }
+
+        public override void EndInteract()
+        {
+            
         }
 
         private void PressedTitleEdit(object? sender, PointerPressedEventArgs e)

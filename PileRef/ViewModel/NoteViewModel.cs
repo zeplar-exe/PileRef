@@ -5,6 +5,5 @@ namespace PileRef.ViewModel;
 
 public partial class NoteViewModel : ObservableObject
 {
-    [ObservableProperty] private bool editingTitle;
-    [ObservableProperty] private bool editingContent;
+    [ObservableProperty] private bool isEditing;
 }

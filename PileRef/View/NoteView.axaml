@@ -5,19 +5,17 @@
              Height="{Binding Note.Height}">
     <Grid RowDefinitions="Auto, *" PointerPressed="ControlPressed">
         <TextBox Grid.Row="0" x:Name="v_Title" 
-                 IsReadOnly="{Binding !ViewModel.EditingTitle}"
-                 Focusable="{Binding ViewModel.EditingTitle}"
+                 IsReadOnly="{Binding !ViewModel.IsEditing}"
+                 Focusable="{Binding ViewModel.IsEditing}"
                  HorizontalAlignment="Stretch" TextAlignment="Center" 
                  Text="{Binding Note.Title, Mode=TwoWay}"
-                 KeyDown="OnTitleKeyDown"
-                 LostFocus="TitleEditLostFocus"></TextBox>
+                 KeyDown="OnTitleKeyDown"></TextBox>
         <ContentControl Grid.Row="1">
             <TextBox x:Name="v_Content" 
-                     IsReadOnly="{Binding !ViewModel.EditingContent}"
-                     Focusable="{Binding ViewModel.EditingContent}"
+                     IsReadOnly="{Binding !ViewModel.IsEditing}"
+                     Focusable="{Binding ViewModel.IsEditing}"
                      BorderThickness="0" AcceptsReturn="True" TextWrapping="Wrap" 
-                     Text="{Binding Note.Text, Mode=TwoWay}"
-                     LostFocus="ContentEditLostFocus"></TextBox>
+                     Text="{Binding Note.Text, Mode=TwoWay}"></TextBox>
         </ContentControl>
     </Grid>
 </UserControl>
