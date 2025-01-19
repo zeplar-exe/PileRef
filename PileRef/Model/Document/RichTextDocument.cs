@@ -5,7 +5,7 @@ namespace PileRef.Model.Document;
 
 public class RichTextDocument : TextDocumentBase
 {
-    public RichTextDocument(Stream stream, DocumentUri uri, Encoding encoding) : base(stream, uri, encoding)
+    public RichTextDocument(DocumentUri uri, Encoding encoding) : base(uri, encoding)
     {
         
     }

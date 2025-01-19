@@ -4,7 +4,7 @@ namespace PileRef.Model.Document;
 
 public class XpsDocument : DocumentBase
 {
-    public XpsDocument(Stream stream, DocumentUri uri) : base(uri, stream)
+    public XpsDocument(DocumentUri uri) : base(uri)
     {
         
     }

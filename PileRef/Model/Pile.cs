@@ -14,7 +14,7 @@ using Serilog;
 
 namespace PileRef.Model;
 
-public partial class Pile
+public partial class Pile : IDisposable
 {
     public const int FormatVersion = 0;
     
@@ -29,13 +29,6 @@ public partial class Pile
         foreach (var document in Documents)
         {
             var typeEnum = DocumentTypeEnum.GetEnumFromType(document.GetType());
-
-            if (typeEnum == null)
-            {
-                Log.Logger.Debug($"Discarding document \"{document.Title}\". Document class {document.GetType()} is not supported.");
-                
-                continue;
-            }
 
             var type = typeEnum.Id;
            
@@ -90,18 +83,9 @@ public partial class Pile
                 continue;
             }
             
-            var stream = await uri.OpenAsync();
-
-            if (stream == null)
-            {
-                Log.Logger.Debug($"Discarding document of type {type} from load. Failed to open stream.");
-                
-                continue;
-            }
-            
             var encodingName = document["encoding"]?.Value<string>();
             var encoding = encodingName != null ? Encoding.GetEncoding(encodingName) : Encoding.Default;
-            var doc = DocumentTypeEnum.CreateDocumentFromEnum(typeEnum, stream, uri, encoding);
+            var doc = DocumentTypeEnum.CreateDocumentFromEnum(typeEnum, uri, encoding);
 
             if (doc == null)
             {
@@ -122,5 +106,13 @@ public partial class Pile
             Notes = new List<Note>(notes), 
             Documents = new List<DocumentBase>(deserializedDocuments) 
         };
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        
+        foreach (var document in Documents)
+            document.Dispose();
     }
 }

@@ -4,7 +4,7 @@ namespace PileRef.Model.Document;
 
 public class XmlWordDocument : DocumentBase
 {
-    public XmlWordDocument(Stream stream, DocumentUri uri) : base(uri, stream)
+    public XmlWordDocument(DocumentUri uri) : base(uri)
     {
         
     }

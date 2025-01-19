@@ -3,19 +3,42 @@
              x:Class="PileRef.View.NoteView"
              Width="{Binding Note.Width}"
              Height="{Binding Note.Height}">
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Click="SaveToFile" Header="Save to File"></MenuItem>
+            <MenuItem Header="Search Text" HotKey="Ctrl+F"></MenuItem>
+            <MenuItem IsChecked="{Binding Note.ShowTitle, Mode=TwoWay}" ToggleType="CheckBox" Header="Show Title">
+            </MenuItem>
+            <MenuItem Header="Move Back"></MenuItem>
+            <MenuItem Header="Move Forward"></MenuItem>
+            <MenuItem Header="Move to Back"></MenuItem>
+            <MenuItem Header="Move to Front"></MenuItem>
+            <MenuItem Click="Delete" Header="Delete"></MenuItem>
+        </ContextMenu>
+    </UserControl.ContextMenu>
     <Grid RowDefinitions="Auto, *" PointerPressed="ControlPressed">
         <TextBox Grid.Row="0" x:Name="v_Title" 
                  IsReadOnly="{Binding !ViewModel.IsEditing}"
                  Focusable="{Binding ViewModel.IsEditing}"
+                 IsVisible="{Binding Note.ShowTitle}"
                  HorizontalAlignment="Stretch" TextAlignment="Center" 
                  Text="{Binding Note.Title, Mode=TwoWay}"
-                 KeyDown="OnTitleKeyDown"></TextBox>
+                 KeyDown="OnTitleKeyDown">
+            <TextBox.ContextMenu>
+                <ContextMenu IsVisible="False"></ContextMenu>
+            </TextBox.ContextMenu>
+        </TextBox>
         <ContentControl Grid.Row="1">
             <TextBox x:Name="v_Content" 
                      IsReadOnly="{Binding !ViewModel.IsEditing}"
                      Focusable="{Binding ViewModel.IsEditing}"
                      BorderThickness="0" AcceptsReturn="True" TextWrapping="Wrap" 
-                     Text="{Binding Note.Text, Mode=TwoWay}"></TextBox>
+                     Text="{Binding Note.Text, Mode=TwoWay}"
+                     PointerWheelChanged="ContentOnPointerWheelChanged">
+                <TextBox.ContextMenu>
+                    <ContextMenu IsVisible="False"></ContextMenu>
+                </TextBox.ContextMenu>
+            </TextBox>
         </ContentControl>
     </Grid>
 </UserControl>

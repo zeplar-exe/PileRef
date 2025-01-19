@@ -5,7 +5,7 @@ namespace PileRef.Model.Document;
 
 public class OldWordDocument : TextDocumentBase
 {
-    public OldWordDocument(Stream stream, DocumentUri uri, Encoding encoding) : base(stream, uri, encoding)
+    public OldWordDocument(DocumentUri uri, Encoding encoding) : base(uri, encoding)
     {
     }
 }

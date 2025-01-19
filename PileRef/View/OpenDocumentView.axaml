@@ -19,8 +19,7 @@
         
         <ScrollViewer>
             <ListBox ItemsSource="{Binding DocumentTypes}"
-                     SelectionMode="AlwaysSelected" SelectedItem="{Binding DocumentType}" 
-                     SelectionChanged="DocumentTypeSelected">
+                     SelectionMode="AlwaysSelected" SelectedItem="{Binding DocumentType, Mode=TwoWay}">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="document:DocumentType">
                         <StackPanel>
@@ -39,7 +38,7 @@
         </StackPanel>
         <Label IsVisible="{Binding TitleEmpty}">Document title will default to "Untitled Document".</Label>
         
-        <StackPanel IsVisible="{Binding DocumentType.IsTextEncodable}">
+        <StackPanel IsVisible="{Binding IsTextEncodable}">
             <Label>Encoding</Label>
             <ComboBox SelectedIndex="0" ItemsSource="{Binding Encodings}" SelectionChanged="EncodingSelected">
                 <ComboBox.ItemTemplate>

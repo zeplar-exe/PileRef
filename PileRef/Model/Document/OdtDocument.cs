@@ -4,7 +4,7 @@ namespace PileRef.Model.Document;
 
 public class OdtDocument : DocumentBase
 {
-    public OdtDocument(Stream stream, DocumentUri uri) : base(uri, stream)
+    public OdtDocument(DocumentUri uri) : base(uri)
     {
         
     }

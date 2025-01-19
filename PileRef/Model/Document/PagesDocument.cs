@@ -4,7 +4,7 @@ namespace PileRef.Model.Document;
 
 public class PagesDocument : DocumentBase
 {
-    public PagesDocument(Stream stream, DocumentUri uri) : base(uri, stream)
+    public PagesDocument(DocumentUri uri) : base(uri)
     {
         
     }

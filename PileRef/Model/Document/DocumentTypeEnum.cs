@@ -35,7 +35,7 @@ public static class DocumentTypeEnum
         .Where(p => p.FieldType == typeof(DocumentType))
         .Select(p => (p.GetValue(null) as DocumentType)!).ToArray();
 
-    public static DocumentType? GetEnumFromType(Type type) 
+    public static DocumentType GetEnumFromType(Type type) 
     {
         if (!type.IsAssignableTo(typeof(DocumentBase)))
             throw new ArgumentException($"Type '{type.FullName}' is not assignable to '{typeof(DocumentBase).FullName}'");
@@ -67,38 +67,38 @@ public static class DocumentTypeEnum
         if (type == typeof(XmlDocument))
             return DOCX;
 
-        return null;
+        throw new ArgumentException($"Document type '{type.FullName}' is not handled'");
     }
 
-    public static DocumentBase? CreateDocumentFromEnum(DocumentType type, Stream stream, DocumentUri uri, Encoding encoding)
+    public static DocumentBase? CreateDocumentFromEnum(DocumentType type, DocumentUri uri, Encoding encoding)
     {
         if (type == Markdown) 
-            return new MarkdownDocument(stream, uri, encoding);
+            return new MarkdownDocument(uri, encoding);
         if (type == PlainText) 
-            return new PlainTextDocument(stream, uri, encoding);
+            return new PlainTextDocument(uri, encoding);
         if (type == Latex)
-            return new LatexDocument(stream, uri, encoding);
+            return new LatexDocument(uri, encoding);
         if (type == DOC)
-            return new OldWordDocument(stream, uri, encoding);
+            return new OldWordDocument(uri, encoding);
         if (type == ODT)
-            return new OdtDocument(stream, uri);
+            return new OdtDocument(uri);
         if (type == SVG)
-            return new SvgDocument(stream, uri, encoding);
+            return new SvgDocument(uri, encoding);
         if (type == PAGES)
-            return new PagesDocument(stream, uri);
+            return new PagesDocument(uri);
         // https://web.archive.org/web/20241120144313/https://www.tempmail.us.com/en/iwork/effortlessly-accessing-pages-and-numbers-files-with-c-on-windows
         if (type == RTF)
-            return new RichTextDocument(stream, uri, encoding);
+            return new RichTextDocument(uri, encoding);
         if (type == XPS)
-            return new XpsDocument(stream, uri);
+            return new XpsDocument(uri);
         if (type == PDF)
-            return new PilePdfDocument(stream, uri);
+            return new PilePdfDocument(uri);
         if (type == EPUB)
-            return new EpubDocument(stream, uri);
+            return new EpubDocument(uri);
         if (type == Image)
-            return new ImageDocument(stream, uri);
+            return new ImageDocument(uri);
         if (type == DOCX)
-            return new XmlWordDocument(stream, uri);
+            return new XmlWordDocument(uri);
 
         return null;
     }

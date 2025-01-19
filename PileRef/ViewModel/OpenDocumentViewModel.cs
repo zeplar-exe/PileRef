@@ -24,6 +24,7 @@ public partial class OpenDocumentViewModel : ObservableObject
     
     [ObservableProperty] private bool uriIsFile = true;
     
+    public bool IsTextEncodable => DocumentType.Flags.HasFlag(DocumentFlags.TextEncodable);
     public bool TitleEmpty => string.IsNullOrEmpty(Title);
     public bool FileExists => (UriIsFile && File.Exists(Uri)) || !UriIsFile;
     public bool FormCompleted => !string.IsNullOrEmpty(Uri) && FileExists;
@@ -72,5 +73,10 @@ public partial class OpenDocumentViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(FormCompleted));
         OnPropertyChanged(nameof(FileExists));
+    }
+
+    partial void OnDocumentTypeChanged(DocumentType? oldValue, DocumentType newValue)
+    {
+        OnPropertyChanged(nameof(IsTextEncodable));
     }
 }

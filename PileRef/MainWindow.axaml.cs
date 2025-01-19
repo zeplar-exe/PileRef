@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using Newtonsoft.Json;
@@ -25,8 +27,6 @@ namespace PileRef
         private HashSet<IPileObject> SelectedObjects { get; } = [];
         private ObjectViewBase? CurrentInteract { get; set; }
         private bool IsMouseDown { get; set; }
-        private bool IsDragMouseDown { get; set; }
-        private bool WasDragging { get; set; }
         private Point LastMousePosition { get; set; }
         
         public MainWindowViewModel ViewModel { get; }
@@ -47,11 +47,11 @@ namespace PileRef
             InitializeComponent();
             
             AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel, handledEventsToo: true);
-            AddHandler(PointerPressedEvent, OnMouseDown, RoutingStrategies.Tunnel, handledEventsToo: true);
             AddHandler(PointerPressedEvent, OnMouseDownBubble, RoutingStrategies.Bubble, handledEventsToo: true);
             AddHandler(PointerMovedEvent, OnMouseMove, RoutingStrategies.Tunnel, handledEventsToo: true);
             AddHandler(PointerReleasedEvent, OnMouseUp, RoutingStrategies.Tunnel, handledEventsToo: true);
             AddHandler(PointerReleasedEvent, OnMouseUpBubble, RoutingStrategies.Bubble, handledEventsToo: true);
+            AddHandler(PointerWheelChangedEvent, OnWheelTunnel, RoutingStrategies.Tunnel, handledEventsToo: true);
             AddHandler(DragDrop.DropEvent, OnDrop);
         }
 
@@ -71,15 +71,14 @@ namespace PileRef
             ViewModel.OpenDocument(pos, this);
         }
 
-        private void OnSelect(object? sender, RoutedEventArgs e)
+        private void OnObjectSelect(object? sender, RoutedEventArgs e)
         {
             var viewBase = (ObjectViewBase)sender!;
-            var args = (PileObjectSelectEventArgs)e;
             
-            HandlePileObjectSelect(viewBase.PileObject, args);
+            HandlePileObjectSelect(viewBase.PileObject);
         }
         
-        private void OnInteract(object? sender, RoutedEventArgs e)
+        private void OnObjectInteract(object? sender, RoutedEventArgs e)
         {
             var viewBase = (ObjectViewBase)sender!;
 
@@ -89,42 +88,48 @@ namespace PileRef
             viewBase.BeginInteract();
         }
 
-        private void HandlePileObjectSelect(IPileObject pileObject, PileObjectSelectEventArgs args)
+        private void OnObjectDelete(object? sender, RoutedEventArgs e)
         {
-            var pointerArgs = args.PointerArgs;
+            var viewBase = (ObjectViewBase)sender!;
+            var pileObject = viewBase.PileObject;
+
+            SelectedObjects.Remove(pileObject);
+            if (CurrentInteract == viewBase)
+                CurrentInteract = null;
             
-            if (SelectedObjects.Contains(pileObject))
-            {
-                SelectedObjects.Remove(pileObject);
-            }
-            else
-            {
-                SelectedObjects.Clear();
-                SelectedObjects.Add(pileObject);
-            }
+            ViewModel.RemovePileObject(pileObject);
+        }
+        
+        private void HandlePileObjectSelect(IPileObject pileObject)
+        {
+            SelectedObjects.Clear();
+            SelectedObjects.Add(pileObject);
+            
+            ViewModel.SelectionWidth = pileObject.Width;
+            ViewModel.SelectionHeight = pileObject.Height;
+            ViewModel.SelectionLeft = pileObject.XPosition;
+            ViewModel.SelectionTop = pileObject.YPosition;
         }
 
         private void OnWindowGainFocus(object? sender, RoutedEventArgs e)
         {
             SelectedObjects.Clear();
         }
-
-        private void OnMouseDown(object? sender, PointerPressedEventArgs e)
+        
+        private void OnMouseDownBubble(object? sender, PointerPressedEventArgs e)
         {
             IsMouseDown = true;
-            WasDragging = false;
-            CurrentInteract?.EndInteract();
-            CurrentInteract = null;
-            SelectedObjects.Clear();
+            
+            if (!e.Handled)
+            {
+                CurrentInteract?.EndInteract();
+                CurrentInteract = null;
+                SelectedObjects.Clear();
+            }
 
             var pointerProps = e.GetCurrentPoint(this).Properties;
             ViewModel.IsPanning = pointerProps.IsLeftButtonPressed && e.KeyModifiers.HasFlag(KeyModifiers.Alt) ||
                                   pointerProps.IsMiddleButtonPressed;
-        }
-        
-        private void OnMouseDownBubble(object? sender, PointerPressedEventArgs e)
-        {
-            
         }
         
         private void OnMouseMove(object? sender, PointerEventArgs e)
@@ -139,21 +144,15 @@ namespace PileRef
             
             if (ViewModel.IsPanning)
             {
-                ViewModel.PanX += delta.X * ViewModel.DragScale;
-                ViewModel.PanY += delta.Y * ViewModel.DragScale;
+                ViewModel.Pan(delta.X * ViewModel.DragScale, delta.Y * ViewModel.DragScale);
                 
                 return;
             }
 
-            WasDragging = true;
-
-            if (IsDragMouseDown)
+            foreach (var selected in SelectedObjects)
             {
-                foreach (var selected in SelectedObjects)
-                {
-                    selected.XPosition += delta.X * ViewModel.DragScale;
-                    selected.YPosition += delta.Y * ViewModel.DragScale;
-                }
+                selected.XPosition += delta.X * ViewModel.DragScale;
+                selected.YPosition += delta.Y * ViewModel.DragScale;
             }
 
             LastMousePosition = e.GetPosition(this);
@@ -178,9 +177,21 @@ namespace PileRef
             }
         }
 
+        private void OnWheelTunnel(object? sender, PointerWheelEventArgs e)
+        {
+            if (e.KeyModifiers.HasFlag(KeyModifiers.Alt))
+            {
+                e.Handled = true;
+                ViewModel.Zoom(e.Delta.Y);
+            }
+        }
+        
         private void OnWheel(object? sender, PointerWheelEventArgs e)
         {
-            ViewModel.ZoomLevel += e.Delta.Y;
+            if (!e.Handled)
+            {
+                ViewModel.Zoom(e.Delta.Y);
+            }
         }
 
         private async void OnDrop(object? sender, DragEventArgs e)
@@ -235,6 +246,17 @@ namespace PileRef
             document.YPosition = pos.Y;
             
             ViewModel.AddPileObject(document);
+        }
+
+        private async void OnClosing(object? sender, WindowClosingEventArgs e)
+        {
+            if (e.IsProgrammatic)
+                return;
+            
+            e.Cancel = true;
+            
+            if (await ViewModel.HandleClosing())
+                Close();
         }
     }
 }

@@ -1,7 +1,9 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using PileRef.Model;
 using PileRef.ViewModel;
 
@@ -33,12 +35,14 @@ namespace PileRef.View
             v_Content.AddHandler(KeyDownEvent, OnContentKeyDown, RoutingStrategies.Tunnel);
         }
 
-        public override void BeginInteract()
+        protected override void OnBeginInteract()
         {
             ViewModel.IsEditing = true;
+            v_Title.ClearSelection();
+            v_Content.ClearSelection();
         }
 
-        public override void EndInteract()
+        protected override void OnEndInteract()
         {
             ViewModel.IsEditing = false;
         }
@@ -64,6 +68,37 @@ namespace PileRef.View
                     TopLevel.GetTopLevel(this)!.Focus();
                     break;
             }
+        }
+
+        private void ContentOnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        protected override void ControlPressed(object? sender, PointerPressedEventArgs e)
+        {
+            base.ControlPressed(sender, e);
+            
+            if (IsInteracting)
+                return;
+            
+            if (!e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+                return;
+
+            e.Handled = true;
+            ContextMenu?.Open();
+        }
+
+        private async void SaveToFile(object? sender, RoutedEventArgs e)
+        {
+            var storageProvider = TopLevel.GetTopLevel(this)!.StorageProvider;
+
+            await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions { SuggestedFileName = Note.Title });
+        }
+
+        private void Delete(object? sender, RoutedEventArgs e)
+        {
+            RaiseEvent(new RoutedEventArgs(RequestDeleteEvent, e));
         }
     }
 }

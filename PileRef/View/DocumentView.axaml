@@ -8,12 +8,31 @@
              xmlns:document="clr-namespace:PileRef.View.Document"
              xmlns:documents="clr-namespace:PileRef.Model.Document"
              x:Class="PileRef.View.DocumentView"
+             x:Name="v_Doc"
              Width="{Binding Document.Width}"
              Height="{Binding Document.Height}">
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Click="ChangeDocumentType" Header="Change Document Type"></MenuItem>
+            <MenuItem IsVisible="{Binding ViewModel.CanNoteConvert}" Header="Convert to Note"></MenuItem>
+            <MenuItem IsChecked="{Binding Document.ShowTitle, Mode=TwoWay}" ToggleType="CheckBox" Header="Show Title">
+            </MenuItem>
+            <MenuItem Click="CreateUniqueFile" Header="Use Unique File"></MenuItem>
+            <MenuItem IsVisible="{Binding ViewModel.CanSearchText}" Header="Search Text" HotKey="Ctrl+F"></MenuItem>
+            <MenuItem Click="OpenSource" Header="Open Source"></MenuItem>
+            <MenuItem IsVisible="{Binding Document.Uri.IsFile}" Click="OpenSourceExplorer" Header="Open Source in Explorer"></MenuItem>
+            <MenuItem Header="Move Back"></MenuItem>
+            <MenuItem Header="Move Forward"></MenuItem>
+            <MenuItem Header="Move to Back"></MenuItem>
+            <MenuItem Header="Move to Front"></MenuItem>
+            <MenuItem Click="Remove" Header="Remove"></MenuItem>
+        </ContextMenu>
+    </UserControl.ContextMenu>
     <Grid RowDefinitions="Auto, *">
         <TextBox Grid.Row="0" x:Name="v_Title" 
-                 IsReadOnly="{Binding !ViewModel.EditingTitle}" 
-                 Focusable="{Binding ViewModel.EditingTitle}"
+                 IsReadOnly="{Binding !ViewModel.IsInteracting}" 
+                 Focusable="{Binding ViewModel.IsInteracting}"
+                 IsVisible="{Binding ShowTitle}"
                  TextAlignment="Center" Text="{Binding Document.Title, Mode=TwoWay}"></TextBox>
         <ContentControl Grid.Row="1" 
                         Content="{Binding Document}" 
@@ -21,12 +40,24 @@
             <ContentControl.ContentTemplate>
                 <pileRef:ObjectTemplateSelector>
                     <DataTemplate x:Key="{x:Type documents:MarkdownDocument}" DataType="documents:MarkdownDocument">
-                        <mdxaml:MarkdownScrollViewer Cursor="IBeam" SelectionEnabled="True"
-                                                     Markdown="{Binding Content}"/>
+                        <Grid>
+                            <mdxaml:MarkdownScrollViewer Cursor="IBeam" SelectionEnabled="True"
+                                                         Markdown="{Binding Content}"
+                                                         IsVisible="{Binding #v_Doc.ViewModel.IsInteracting}"/>
+                            
+                        </Grid>
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type documents:PlainTextDocument}" DataType="documents:PlainTextDocument">
-                        <SelectableTextBlock Text="{Binding Content}"
-                                             TextWrapping="Wrap"/>
+                        <Grid>
+                            <SelectableTextBlock Text="{Binding Content}" TextWrapping="Wrap"
+                                                 IsEnabled="{Binding #v_Doc.ViewModel.IsInteracting}"
+                                                 IsVisible="{Binding !#v_Doc.ViewModel.IsInteracting}"/>
+                            <TextBox Text="{Binding Content, Mode=TwoWay}" TextWrapping="Wrap"
+                                     IsEnabled="{Binding 
+                                        #v_Doc.ViewModel.IsInteracting}"
+                                     IsVisible="{Binding 
+                                        #v_Doc.ViewModel.IsInteracting}"/>
+                        </Grid>
                     </DataTemplate>
                     <DataTemplate x:Key="{x:Type documents:LatexDocument}" DataType="documents:LatexDocument">
                         <controls:FormulaBlock Formula="{Binding Content}"/>

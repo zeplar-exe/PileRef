@@ -4,7 +4,7 @@ namespace PileRef.Model.Document;
 
 public class EpubDocument : DocumentBase
 {
-    public EpubDocument(Stream stream, DocumentUri uri) : base(uri, stream)
+    public EpubDocument(DocumentUri uri) : base(uri)
     {
         
     }

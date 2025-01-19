@@ -28,4 +28,6 @@ public partial class Note : ObservableObject, IPileObject
     [ObservableProperty]
     [JsonProperty("height")]
     public partial double Height { get; set; } = 300;
+
+    [ObservableProperty] public partial bool ShowTitle { get; set; } = true;
 }

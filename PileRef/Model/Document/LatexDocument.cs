@@ -5,7 +5,7 @@ namespace PileRef.Model.Document;
 
 public class LatexDocument : TextDocumentBase
 {
-    public LatexDocument(Stream stream, DocumentUri uri, Encoding encoding) : base(stream, uri, encoding)
+    public LatexDocument(DocumentUri uri, Encoding encoding) : base(uri, encoding)
     {
         
     }

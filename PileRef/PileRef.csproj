@@ -56,7 +56,4 @@
       <None Remove="locale\english.json" />
       <Resource Include="locale\English.json" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Common\" />
-    </ItemGroup>
 </Project>

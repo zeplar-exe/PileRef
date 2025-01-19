@@ -9,9 +9,9 @@ public sealed class ImageDocument : DocumentBase
 {
     public IImage Image { get; private set; }
 
-    public ImageDocument(Stream stream, DocumentUri uri) : base(uri, stream)
+    public ImageDocument(DocumentUri uri) : base(uri)
     {
-        Update();
+        
     }
 
     [MemberNotNull(nameof(Image))]

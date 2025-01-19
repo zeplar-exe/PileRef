@@ -29,18 +29,24 @@ namespace PileRef.ViewModel;
 public partial class MainWindowViewModel : ObservableObject
 {
     [ObservableProperty] private partial Pile? Pile { get; set; }
-    
-    [ObservableProperty] private string? pileFilePath;
+
+    [ObservableProperty] public partial string? PileFilePath { get; set; }
     public ObservableCollection<string> RecentPiles { get; } = [];
-    [ObservableProperty] private bool changesMade;
+    [ObservableProperty] public partial bool ChangesMade { get; set; }
 
-    [ObservableProperty] private bool isPanning;
-    [ObservableProperty] private StandardCursorType cursor = StandardCursorType.Arrow;
+    [ObservableProperty] public partial bool IsPanning { get; set; }
+    [ObservableProperty] public partial StandardCursorType Cursor { get; set; } = StandardCursorType.Arrow;
 
-    [ObservableProperty] private double panX;
-    [ObservableProperty] private double panY;
-    [ObservableProperty] private double zoomLevel = 0;
-
+    [ObservableProperty] public partial double PanX { get; set; }
+    [ObservableProperty] public partial double PanY { get; set; }
+    [ObservableProperty] public partial double ZoomLevel { get; set; } = 0;
+    
+    [ObservableProperty] public partial IBrush SelectionBrush { get; set; } = new SolidColorBrush(Colors.LightBlue);
+    [ObservableProperty] public partial double SelectionWidth { get; set; }
+    [ObservableProperty] public partial double SelectionHeight { get; set; }
+    [ObservableProperty] public partial double SelectionLeft { get; set; }
+    [ObservableProperty] public partial double SelectionTop { get; set; }
+    
     private ActionManager ActionManager { get; } = new();
     
     private IStorageProvider StorageProvider { get; }
@@ -57,6 +63,7 @@ public partial class MainWindowViewModel : ObservableObject
     partial void OnPileChanged(Pile? value)
     {
         ChangesMade = true;
+        ZoomLevel = 0;
         PileObjects.Clear();
         
         if (value == null)
@@ -77,6 +84,33 @@ public partial class MainWindowViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(ZoomScale));
         OnPropertyChanged(nameof(DragScale));
+    }
+
+    public void Zoom(double levelChange)
+    {
+        if (Pile == null)
+            return;
+        
+        ZoomLevel = Math.Min(ZoomLevel + levelChange, 15);
+    }
+
+    public void Pan(double x, double y)
+    {
+        if (Pile == null)
+            return; 
+        
+        PanX += x;
+        PanY += y;
+    }
+    
+    public async Task<bool> HandleClosing()
+    {
+        if (!await RequestSaveChangesIfUnsaved())
+            return false;
+        
+        Pile?.Dispose();
+
+        return true;
     }
 
     [RelayCommand]
@@ -156,23 +190,10 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     public async Task CreatePile()
     {
-        if (ChangesMade)
-        {
-            var result = await MessageBoxManager.GetMessageBoxStandard(
-                "Create New Pile", "The current pile has unsaved changes. Would you like to save?",
-                ButtonEnum.YesNoCancel).ShowAsync();
-
-            if (result == ButtonResult.Yes)
-            {
-                await SavePile();
-            }
-            else if (result != ButtonResult.No)
-            {
-                return;
-            }
-        }
+        if (!(await RequestSaveChangesIfUnsaved()))
+            return;
         
-        Pile = new Pile();
+        Pile = null;
         PileFilePath = null;
     }
 
@@ -275,5 +296,24 @@ public partial class MainWindowViewModel : ObservableObject
         }
         
         ChangesMade = true;
+    }
+
+    private async Task<bool> RequestSaveChangesIfUnsaved()
+    {
+        if (!ChangesMade)
+            return true;
+        
+        var option = await MessageBoxManager.GetMessageBoxStandard(
+            "Exit?", "The current pile has unsaved changes. Would you like to save?",
+            ButtonEnum.YesNoCancel).ShowAsync();
+        
+        if (option == ButtonResult.Yes)
+        {
+            await SavePile();
+
+            return false;
+        }
+
+        return true;
     }
 }

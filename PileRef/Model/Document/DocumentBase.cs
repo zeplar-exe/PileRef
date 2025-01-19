@@ -6,11 +6,12 @@ using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Serilog;
 
 namespace PileRef.Model.Document;
 
 [JsonObject(MemberSerialization.OptIn)]
-public abstract partial class DocumentBase : ObservableObject, IPileObject
+public abstract partial class DocumentBase : ObservableObject, IPileObject, IDisposable, IAsyncDisposable
 {
     [ObservableProperty] [JsonProperty("title")]
     public partial string Title { get; set; } = string.Empty;
@@ -29,26 +30,45 @@ public abstract partial class DocumentBase : ObservableObject, IPileObject
 
     [ObservableProperty] [JsonProperty("height")]
     public partial double Height { get; set; } = 300;
+    
+    [ObservableProperty] public partial bool ShowTitle { get; set; } = true;
 
     public event EventHandler? OnUpdated;
     
-    protected Stream Stream { get; }
+    protected Stream Stream { get; private set; }
+    private FileSystemWatcher? Watcher { get; set; }
     
-    protected DocumentBase(DocumentUri uri, Stream stream)
+    protected DocumentBase(DocumentUri uri)
     {
         Uri = uri;
-        Stream = stream;
+    }
+
+    async partial void OnUriChanged(DocumentUri value)
+    {
+        var stream = await value.OpenAsync();
+
+        if (stream != null)
+        {
+            Stream = stream;
+        }
+        else
+        {
+            Log.Warning($"Failed to open stream for URI {value.Path}.");
+            
+            stream = new MemoryStream();
+        }
         
         if (!Uri.IsFile)
             return;
         
-        var watcher = new FileSystemWatcher
+        Watcher?.Dispose();
+        Watcher = new FileSystemWatcher
         {
-            Path = Path.GetDirectoryName(uri.Path)!, Filter = Path.GetFileName(uri.Path),
+            Path = Path.GetDirectoryName(Uri.Path)!, Filter = Path.GetFileName(Uri.Path),
             EnableRaisingEvents = true
         };
-            
-        watcher.Changed += (_, args) =>
+        
+        Watcher.Changed += (_, args) =>
         {
             try
             {
@@ -67,7 +87,31 @@ public abstract partial class DocumentBase : ObservableObject, IPileObject
                 });
             }
         };
+        
+        Update();
+    }
+
+    public void CopyTo(Stream target)
+    {
+        var head = Stream.Position;
+        
+        Stream.Seek(0, SeekOrigin.Begin);
+        Stream.CopyTo(target);
+        
+        Stream.Seek(head, SeekOrigin.Begin);
     }
 
     public abstract void Update();
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        Stream.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        await Stream.DisposeAsync();
+    }
 }

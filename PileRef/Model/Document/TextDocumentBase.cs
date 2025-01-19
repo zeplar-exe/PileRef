@@ -15,7 +15,7 @@ public abstract partial class TextDocumentBase : DocumentBase
     [ObservableProperty] [JsonProperty("encoding")]
     public partial Encoding Encoding { get; set; }
 
-    protected TextDocumentBase(Stream stream, DocumentUri uri, Encoding encoding) : base(uri, stream)
+    protected TextDocumentBase(DocumentUri uri, Encoding encoding) : base(uri)
     {
         Encoding = encoding;
         

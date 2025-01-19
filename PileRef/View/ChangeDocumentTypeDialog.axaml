@@ -1,0 +1,43 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:text="clr-namespace:System.Text;assembly=System.Runtime"
+             xmlns:document="clr-namespace:PileRef.Model.Document"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="PileRef.View.ChangeDocumentTypeDialog">
+    <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *, Auto">
+        <Label Grid.Row="0">General Properties</Label>
+        <ScrollViewer Grid.Row="1">
+            <ListBox ItemsSource="{Binding DocumentTypes}"
+                     SelectionMode="AlwaysSelected" SelectedItem="{Binding DocumentType, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="document:DocumentType">
+                        <StackPanel>
+                            <Image></Image>
+                            <TextBlock Text="{Binding DisplayName}"></TextBlock>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </ScrollViewer>
+        <Separator Grid.Row="3"></Separator>
+        <StackPanel Grid.Row="4" IsVisible="{Binding IsTextEncodable}">
+            <Label>Encoding</Label>
+            <ComboBox SelectedItem="{Binding Encoding, Mode=TwoWay}" ItemsSource="{Binding Encodings}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate DataType="text:EncodingInfo">
+                        <ComboBoxItem>
+                            <Label Content="{Binding DisplayName}"></Label>
+                        </ComboBoxItem>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="6" Orientation="Horizontal">
+            <Button Click="Cancel">Cancel</Button>
+            <Button Click="OnDone">Change</Button>
+        </StackPanel>
+    </Grid>
+</Window>
